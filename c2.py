@@ -4,6 +4,9 @@ from observer.archiver import Archiver
 
 
 class Controller:
+    '''
+    This class is the entry point of the C2 application.
+    '''
     def __init__(self, tradingPair):
         '''
         Initiate a Controller for the passed trading pair.
