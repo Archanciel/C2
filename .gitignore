@@ -3,3 +3,4 @@
 /apikey/__pycache__
 /observable/__pycache__
 /observer/__pycache__
+*.csv
