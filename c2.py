@@ -14,7 +14,7 @@ class Controller:
         :param tradingPair: example: 'BTCUSDT'
         '''
         self.datasource = BinanceDatasource(tradingPair)
-        self.datasource.addObserver(Archiver())
+        self.datasource.addObserver(Archiver('primary.csv'))
 
 
     def start(self):
@@ -31,7 +31,7 @@ class Controller:
         Stop the data stream.
         :return:
         '''
-        self.datasource.stopDataReception()
+        self.datasource.stopObservable()
 
 
 if __name__ == '__main__':

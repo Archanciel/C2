@@ -15,8 +15,7 @@ class Observable(metaclass=ABCMeta):
     def notifyObservers(self, data = None):
         '''
         Each observer has its
-        update() called with two arguments: this
-        observable object and the generic 'arg'.
+        update() called with one argument: the generic 'data'.
         '''
 
         for observer in self.obs:
@@ -28,6 +27,16 @@ class Observable(metaclass=ABCMeta):
     def countObservers(self):
         return len(self.obs)
 
-    @abstractmethod
     def processData(self, data):
-        pass
+        return data
+
+    def stopObservable(self):
+        '''
+        Notifies the Observers that the Observable has stopped notifying them
+        updates.
+
+        :return:
+        '''
+
+        for observer in self.obs:
+            observer.close()

@@ -56,7 +56,7 @@ class BinanceDatasource(Observable):
         self.socketManager.start()
 
 
-    def stopDataReception(self):
+    def stopObservable(self):
         '''
         Stop the Binance data stream.
 
@@ -66,6 +66,7 @@ class BinanceDatasource(Observable):
 
         # required for the program to exit
         reactor.stop()
+        super().stopObservable()
 
 
     def processData(self, data):
@@ -90,15 +91,13 @@ class BinanceDatasource(Observable):
             }
         :return:
         '''
-        timestamp = data['T']
-        price = data['p']
-        volume = data['q']
+        timestampStr = data['T']
+        priceStr = data['p']
+        volumeStr = data['q']
 
-        return timestamp, price, volume
+        #converting string data before writing them to the csv file
+        timestampMilliSec = int(timestampStr)
+        priceFloat = float(priceStr)
+        volumeFloat = float(volumeStr)
 
-
-if __name__ == '__main__':
-    bds = BinanceDatasource('BTCUSDT')
-    from observer.archiver import Archiver
-    bds.addObserver(Archiver())
-    bds.startDataReception()
+        return timestampMilliSec, priceFloat, volumeFloat
