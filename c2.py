@@ -1,12 +1,20 @@
 import sys
+import argparse
+import arrow
+import re
 from observable.binancedatasource import BinanceDatasource
+from observable.archiveddatasource import ArchivedDatasource
 from observer.archiver import Archiver
+from observer.notifyer import Notifyer
 
+VERSION_NUMBER = "0.3"
 
 class Controller:
     '''
     This class is the entry point of the C2 application.
     '''
+    DATE_TIME_FORMAT_ARROW = 'YYYY-MM-DD HH:mm:ss'
+
     def __init__(self):
         '''
         Initiate a Controller for the passed trading pair.
@@ -14,20 +22,87 @@ class Controller:
         :param tradingPair: example: 'BTCUSDT'
         '''
         self.datasource = None
-        self.primaryDataFile = None
+        self.primaryDataFileName = None
+        self.secondaryDataFileName = None
 
-    def start(self, tradingPair):
+    def getCommandLineArgs(self, argList):
+        '''
+        Uses argparse to acquire the user optional command line arguments.
+
+        :param argList: were acquired from sys.argv or set by test code
+
+        :return: execution mode, primary data file name, secondary data file name
+        '''
+        parser = argparse.ArgumentParser(
+            description="Version {}. Executes C2 either in real time or in simulation mode. " \
+                        "In this version, the trading pair is forced to BTCUSDT and real time " \
+                        "data come from the Binance exchange. "
+                        "In real time mode, both primary and secondary data files are generated. " \
+                        "In simulation mode, the primary data are read from the specified primary " \
+                        "data file. The secondary data file is recreated at each simulation run. " \
+                        "The user can specify the output data file names. The final data files are " \
+                        "named using the passed name suffixed by the execution local date and time. " \
+                        "In case no file names are provided, defaults are used, i.e. " \
+                        "primary YYYY.MM.DD HH:MM:SS and secondary YYYY.MM.DD HH:SS. In any mode, " \
+                        "the YYYY.MM.DD HH:MM:SS secondary data file value is equal to the corresponding " \
+                        "primary data file date suffix.".format(VERSION_NUMBER)
+        )
+        parser.add_argument("-m", "--mode", choices=['r', 's'], required=True,
+                            help="specifies the mode, r for real time, s for simulation")
+        parser.add_argument("-p", "--primary", nargs="?", default="primary",
+                            help="primary data file name. A YYYY-MM-DD suffix will be added to the file name. " \
+                                 "Extention will be .csv")
+        parser.add_argument("-s", "--secondary", nargs="?", default="secondary",
+                            help="secondary data file name. A YYYY-MM-DD suffix will be added to the file name. " \
+                                 "Extention will be .csv")
+        args = parser.parse_args(argList)
+
+        return args.mode, args.primary, args.secondary
+
+    def start(self, tradingPair, commandLineArgs=None):
         '''
         Start the data stream.
 
+        :param commandLineArgs: used only for unit testing only
         :return:
         '''
-        self.datasource = BinanceDatasource(tradingPair)
-        self.primaryDataFile = 'primary.csv'
-        self.datasource.addObserver(Archiver(self.primaryDataFile))
-        self.datasource.startDataReception()
+        if commandLineArgs == None:
+            #here, we are not in unit test mode and we collect the parms entered
+            #by the user on the command line
+            commandLineArgs = sys.argv[1:]
 
+        executionMode, primaryFileName, secondaryFileName = self.getCommandLineArgs(commandLineArgs)
+        localNow = arrow.now('EUROPE/ZURICH')
 
+        if executionMode.upper() == 'R':
+            tradingPair = 'BTCUSDT'
+            print('Starting the Binance aggregate trade stream for pair {}. Type s to stop the stream ...'.format(
+                tradingPair))
+            self.datasource = BinanceDatasource(tradingPair)
+            dateTimeStr = localNow.format(self.DATE_TIME_FORMAT_ARROW)
+            self.primaryDataFileName = self.buildPrimaryFileName(primaryFileName, dateTimeStr)
+            self.datasource.addObserver(Archiver(self.primaryDataFileName))
+            self.datasource.startDataReception()
+        else:
+            dateTimeStr = self.extractDateTimeStrFrom(primaryFileName)
+            csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
+            archivedDatasource = ArchivedDatasource(primaryFileName)
+            archivedDatasource.addObserver(Notifyer(csvSecondaryDataFileName))
+            archivedDatasource.processArchivedData()
+
+    def buildPrimaryFileName(self, primaryFileName, dateSuffix):
+        return "{}-{}.csv".format(primaryFileName, dateSuffix)
+
+    def extractDateTimeStrFrom(self, primaryFileName):
+        pattern = r"(\w*)-([0-9-: ]*).csv"
+
+        match = re.match(pattern, primaryFileName)
+
+        if match:
+            dateTimeStr = match.group(1)
+
+            return dateTimeStr
+        
     def stop(self):
         '''
         Stop the data stream.
@@ -37,10 +112,9 @@ class Controller:
 
 
 if __name__ == '__main__':
-    tradePair = 'BTCUSDT'
+    tradingPair = 'BTCUSDT'
     c2 = Controller()
-    print('Starting the Binance aggregate trade stream for pair {}. Type s to stop the stream ...'.format(tradePair))
-    c2.start(tradePair)
+    c2.start()
 
     while True:
         if input() == 's':
