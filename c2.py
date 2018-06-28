@@ -7,13 +7,15 @@ from observable.archiveddatasource import ArchivedDatasource
 from observer.archiver import Archiver
 from observer.notifyer import Notifyer
 
+
 VERSION_NUMBER = "0.3"
+LOCAL_TIME_ZONE = 'Europe/Zurich'
 
 class Controller:
     '''
     This class is the entry point of the C2 application.
     '''
-    DATE_TIME_FORMAT_ARROW = 'YYYY-MM-DD HH:mm:ss'
+    DATE_TIME_FORMAT_ARROW = 'YYYY-MM-DD HH-mm-ss'
 
     def __init__(self):
         '''
@@ -59,7 +61,7 @@ class Controller:
 
         return args.mode, args.primary, args.secondary
 
-    def start(self, tradingPair, commandLineArgs=None):
+    def start(self, commandLineArgs=None):
         '''
         Start the data stream.
 
@@ -72,7 +74,7 @@ class Controller:
             commandLineArgs = sys.argv[1:]
 
         executionMode, primaryFileName, secondaryFileName = self.getCommandLineArgs(commandLineArgs)
-        localNow = arrow.now('EUROPE/ZURICH')
+        localNow = arrow.now(LOCAL_TIME_ZONE)
 
         if executionMode.upper() == 'R':
             tradingPair = 'BTCUSDT'
@@ -86,30 +88,30 @@ class Controller:
         else:
             dateTimeStr = self.extractDateTimeStrFrom(primaryFileName)
             csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
-            archivedDatasource = ArchivedDatasource(primaryFileName)
-            archivedDatasource.addObserver(Notifyer(csvSecondaryDataFileName))
-            archivedDatasource.processArchivedData()
+            self.datasource = ArchivedDatasource(primaryFileName)
+            self.datasource.addObserver(Notifyer(csvSecondaryDataFileName))
+            self.datasource.processArchivedData()
 
     def buildPrimaryFileName(self, primaryFileName, dateSuffix):
         return "{}-{}.csv".format(primaryFileName, dateSuffix)
 
     def extractDateTimeStrFrom(self, primaryFileName):
-        pattern = r"(\w*)-([0-9-: ]*).csv"
+        pattern = r"(\w*)-([0-9- ]*).csv"
 
         match = re.match(pattern, primaryFileName)
 
         if match:
-            dateTimeStr = match.group(1)
+            dateTimeStr = match.group(2)
 
             return dateTimeStr
         
     def stop(self):
         '''
         Stop the data stream.
-        :return:
+        :return: created primary csv file name if started in real time mode
         '''
         self.datasource.stopObservable()
-
+        return self.primaryDataFileName
 
 if __name__ == '__main__':
     tradingPair = 'BTCUSDT'
