@@ -7,22 +7,24 @@ class Controller:
     '''
     This class is the entry point of the C2 application.
     '''
-    def __init__(self, tradingPair):
+    def __init__(self):
         '''
         Initiate a Controller for the passed trading pair.
 
         :param tradingPair: example: 'BTCUSDT'
         '''
-        self.datasource = BinanceDatasource(tradingPair)
-        self.datasource.addObserver(Archiver('primary.csv'))
+        self.datasource = None
+        self.primaryDataFile = None
 
-
-    def start(self):
+    def start(self, tradingPair):
         '''
         Start the data stream.
 
         :return:
         '''
+        self.datasource = BinanceDatasource(tradingPair)
+        self.primaryDataFile = 'primary.csv'
+        self.datasource.addObserver(Archiver(self.primaryDataFile))
         self.datasource.startDataReception()
 
 
@@ -36,9 +38,9 @@ class Controller:
 
 if __name__ == '__main__':
     tradePair = 'BTCUSDT'
-    c2 = Controller(tradePair)
+    c2 = Controller()
     print('Starting the Binance aggregate trade stream for pair {}. Type s to stop the stream ...'.format(tradePair))
-    c2.start()
+    c2.start(tradePair)
 
     while True:
         if input() == 's':
