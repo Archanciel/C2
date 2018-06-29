@@ -68,15 +68,20 @@ class Controller:
         :param commandLineArgs: used only for unit testing only
         :return:
         '''
+        isUnitTestMode = False
+
         if commandLineArgs == None:
             #here, we are not in unit test mode and we collect the parms entered
             #by the user on the command line
             commandLineArgs = sys.argv[1:]
+        else:
+            isUnitTestMode = True
 
         executionMode, primaryFileName, secondaryFileName = self.getCommandLineArgs(commandLineArgs)
         localNow = arrow.now(LOCAL_TIME_ZONE)
 
         if executionMode.upper() == 'R':
+            #C2 executing in real time mode ...
             tradingPair = 'BTCUSDT'
             print('Starting the Binance aggregate trade stream for pair {}. Type s to stop the stream ...'.format(
                 tradingPair))
@@ -85,7 +90,17 @@ class Controller:
             self.primaryDataFileName = self.buildPrimaryFileName(primaryFileName, dateTimeStr)
             self.datasource.addObserver(Archiver(self.primaryDataFileName))
             self.datasource.startDataReception()
+
+            if not isUnitTestMode:
+                #here, we are not in unit test mode and we have to wait for the user to
+                #stop receiving the real time data
+                while True:
+                    if input() == 's':
+                        print('Stopping the stream ...')
+                        c2.stop()
+                        sys.exit(0)  # required for the program to exit !
         else:
+            #C2 executing in simulation mode ...
             dateTimeStr = self.extractDateTimeStrFrom(primaryFileName)
             csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
             self.datasource = ArchivedDatasource(primaryFileName)
@@ -118,8 +133,3 @@ if __name__ == '__main__':
     c2 = Controller()
     c2.start()
 
-    while True:
-        if input() == 's':
-            print('Stopping the stream ...')
-            c2.stop()
-            sys.exit(0) #required for the program to exit !
