@@ -15,7 +15,7 @@ class Controller:
     '''
     This class is the entry point of the C2 application.
     '''
-    DATE_TIME_FORMAT_ARROW = 'YYYY-MM-DD HH-mm-ss'
+    DATE_TIME_FORMAT_ARROW = 'YYYY-MM-DD-HH-mm-ss'
 
     def __init__(self):
         '''
@@ -111,7 +111,7 @@ class Controller:
         return "{}-{}.csv".format(primaryFileName, dateSuffix)
 
     def extractDateTimeStrFrom(self, primaryFileName):
-        pattern = r"(\w*)-([0-9- ]*).csv"
+        pattern = r"(\w*)-([0-9-]*).csv"
 
         match = re.match(pattern, primaryFileName)
 

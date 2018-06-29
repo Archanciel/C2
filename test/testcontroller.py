@@ -18,6 +18,8 @@ class TestController(unittest.TestCase):
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
         print("running c2 in real time mode for 10 seconds")
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-mr'])
         time.sleep(10)
         csvPrimaryDataFileName = controller.stop()
@@ -27,10 +29,12 @@ class TestController(unittest.TestCase):
 
 
     def testStartModeSimulation(self):
-        csvPrimaryDataFileName = "primary-2018-06-28 22-41-05.csv"
-        csvSecondaryDataFileName = "secondary-2018-06-28 22-41-05.csv"
+        csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
+        csvSecondaryDataFileName = "secondary-2018-06-28-22-41-05.csv"
         controller = Controller()
         print("running c2 in simulation mode")
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
         controller.stop()
 
@@ -47,9 +51,9 @@ class TestController(unittest.TestCase):
 
     def testExtractDateTimeStrFrom(self):
         controller = Controller()
-        csvPrimaryDataFileName = "primary-2018-06-28 22-41-05.csv"
+        csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
 
-        self.assertEqual("2018-06-28 22-41-05", controller.extractDateTimeStrFrom(csvPrimaryDataFileName))
+        self.assertEqual("2018-06-28-22-41-05", controller.extractDateTimeStrFrom(csvPrimaryDataFileName))
 
 
     def testBuildPrimaryFileName(self):
