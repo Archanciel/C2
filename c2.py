@@ -37,16 +37,18 @@ class Controller:
         '''
         parser = argparse.ArgumentParser(
             description="Version {}. Executes C2 either in real time or simulation mode. " \
+                        "In both mode, the secondary data are sent to the Criterion for " \
+                        "computing if an alarm is to be raised. " \
                         "In this version, the trading pair is forced to BTCUSDT and real time " \
                         "data come from the Binance exchange. "
                         "In real time mode, both primary and secondary data files are generated. " \
                         "In simulation mode, the primary data are read from the specified primary " \
                         "data file. The secondary data file is recreated at each simulation run. " \
-                        "The user can specify the output data file names. The final data files are " \
-                        "named using the passed name suffixed by the execution local date and time. " \
-                        "In case no file names are provided, defaults are used, i.e. " \
-                        "primary YYYY.MM.DD HH:MM:SS and secondary YYYY.MM.DD HH:SS. In any mode, " \
-                        "the YYYY.MM.DD HH:MM:SS secondary data file value is equal to the corresponding " \
+                        "In both modes, the user can specify the output data file names. The final names are " \
+                        "suffixed with the execution local date and time. " \
+                        "In case no file names are provided, defaults are used, for example " \
+                        "primary-YYYY.MM.DD-HH:MM:SS and secondary-YYYY.MM.DD-HH:SS. In any mode, " \
+                        "the YYYY-MM-DD-HH:MM:SS secondary data file suffix is equal to the corresponding " \
                         "primary data file date suffix.".format(VERSION_NUMBER)
         )
         parser.add_argument("-m", choices=['r', 's'], required=True,
