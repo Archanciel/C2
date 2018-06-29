@@ -8,7 +8,7 @@ from observer.archiver import Archiver
 from observer.notifyer import Notifyer
 
 
-VERSION_NUMBER = "0.3"
+VERSION_NUMBER = "0.4"
 LOCAL_TIME_ZONE = 'Europe/Zurich'
 
 class Controller:
@@ -36,7 +36,7 @@ class Controller:
         :return: execution mode, primary data file name, secondary data file name
         '''
         parser = argparse.ArgumentParser(
-            description="Version {}. Executes C2 either in real time or in simulation mode. " \
+            description="Version {}. Executes C2 either in real time or simulation mode. " \
                         "In this version, the trading pair is forced to BTCUSDT and real time " \
                         "data come from the Binance exchange. "
                         "In real time mode, both primary and secondary data files are generated. " \
@@ -92,8 +92,17 @@ class Controller:
                 tradingPair))
             self.datasource = BinanceDatasource(tradingPair)
             dateTimeStr = localNow.format(self.DATE_TIME_FORMAT_ARROW)
+
+            #adding an Archiver to store on disk the primary data
             self.primaryDataFileName = self.buildPrimaryFileName(primaryFileName, dateTimeStr)
             self.datasource.addObserver(Archiver(self.primaryDataFileName, isVerbose))
+
+            #adding a Notifyer to compute the secondary data, store them on disk and send
+            #them to the Criterion
+            csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
+            #forcing isVerbose to False to avoid interfering with Archiver verbosity !
+            self.datasource.addObserver(Notifyer(csvSecondaryDataFileName, isVerbose=False))
+
             self.datasource.startDataReception()
 
             if not isUnitTestMode:
@@ -106,11 +115,17 @@ class Controller:
                         sys.exit(0)  # required for the program to exit !
         else:
             #C2 executing in simulation mode ...
-            dateTimeStr = self.extractDateTimeStrFrom(primaryFileName)
-            csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
+            csvSecondaryDataFileName = self.buildSecondaryFileNameFromPrimaryFileName(primaryFileName,
+                                                                                      secondaryFileName)
             self.datasource = ArchivedDatasource(primaryFileName)
             self.datasource.addObserver(Notifyer(csvSecondaryDataFileName, isVerbose))
             self.datasource.processArchivedData()
+
+    def buildSecondaryFileNameFromPrimaryFileName(self, primaryFileName, secondaryFileName):
+        dateTimeStr = self.extractDateTimeStrFrom(primaryFileName)
+        csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
+
+        return csvSecondaryDataFileName
 
     def buildPrimaryFileName(self, primaryFileName, dateSuffix):
         return "{}-{}.csv".format(primaryFileName, dateSuffix)

@@ -14,8 +14,6 @@ from c2 import Controller
 class TestController(unittest.TestCase):
 
     def testStartModeRealtime(self):
-        csvPrimaryDataFileName = "../primary.csv"
-        csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
         print("running c2 in real time mode for 10 seconds")
 
@@ -23,9 +21,21 @@ class TestController(unittest.TestCase):
         controller.start(['-mr'])
         time.sleep(10)
         csvPrimaryDataFileName = controller.stop()
+        csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
+
+        with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
+            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+                i, j = 0, 0
+                for i, _ in enumerate(csvPrimaryFile):
+                    pass
+                for j, _ in enumerate(csvSecondaryFile):
+                    pass
+                self.assertEqual(i, j)
 
         self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
+
         os.remove(csvPrimaryDataFileName)
+        os.remove(csvSecondaryDataFileName)
 
 
     def testStartModeSimulation(self):
