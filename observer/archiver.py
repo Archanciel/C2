@@ -7,12 +7,13 @@ class Archiver(Observer):
     '''
     This class stores the received data into a csv file.
     '''
-    def __init__(self, filename):
+    def __init__(self, filename, isVerbose):
         '''
         Constructs an instance of Archiver which will write into the passed
         file name. In case the file already exists, it will be overwritten.
 
         :param filename: name of the file to write in.
+        :param isVerbose: if True, outputs received data in console
         '''
 
         #creating the output csv file and initializing it with the column titles
@@ -20,13 +21,15 @@ class Archiver(Observer):
         self.file = open(self.filename, 'w', newline = '')
         self.writer = csv.writer(self.file)
         self.writer.writerow(self.CSV_ROW_HEADER)
+        self.isVerbose = isVerbose
 
     def update(self, data):
         timestampMilliSec, priceFloat, volumeFloat = data
 
         self.writer.writerow([timestampMilliSec, priceFloat, volumeFloat])
 
-        print(data)
+        if self.isVerbose:
+            print(data)
 
 
     def close(self):

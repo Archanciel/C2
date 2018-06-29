@@ -14,7 +14,7 @@ class TestArchiver(unittest.TestCase):
 
     def testInitCloseCycle(self):
         csvFileName = "test.csv"
-        archiver = Archiver(csvFileName)
+        archiver = Archiver(csvFileName, isVerbose=False)
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:
@@ -37,7 +37,7 @@ class TestArchiver(unittest.TestCase):
             self.assertEqual(DUMMY_HEADER, next(csvReader))
 
         #now, instanciating the Archiver and checking the csv file was overwritten
-        archiver = Archiver(csvFileName)
+        archiver = Archiver(csvFileName, isVerbose=False)
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:

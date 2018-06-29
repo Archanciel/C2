@@ -5,15 +5,17 @@ class Notifyer(Observer):
     '''
     This class ...
     '''
-    def __init__(self, secondaryDataFilename):
+    def __init__(self, secondaryDataFilename, isVerbose):
         '''
         Constructs an instance of Notifyer which computes the secndary data.
 
         :param filename: name of the file to write in.
+        :param isVerbose: if True, outputs received data in console
         '''
 
         #creating the output csv file and initializing it with the column titles
-        self.archiver = Archiver(secondaryDataFilename)
+        self.archiver = Archiver(secondaryDataFilename, isVerbose=False)
+        self.isVerbose = isVerbose
 
 
     def update(self, data):
@@ -21,8 +23,9 @@ class Notifyer(Observer):
 
         self.archiver.update(data)
 
-        print('Notifyer: ',end = '')
-        print(data)
+        if self.isVerbose:
+            print('Notifyer: ', end='')
+            print(data)
 
 
     def close(self):

@@ -49,17 +49,22 @@ class Controller:
                         "the YYYY.MM.DD HH:MM:SS secondary data file value is equal to the corresponding " \
                         "primary data file date suffix.".format(VERSION_NUMBER)
         )
-        parser.add_argument("-m", "--mode", choices=['r', 's'], required=True,
+        parser.add_argument("-m", choices=['r', 's'], required=True,
                             help="specifies the mode, r for real time, s for simulation")
         parser.add_argument("-p", "--primary", nargs="?", default="primary",
-                            help="primary data file name. A YYYY-MM-DD suffix will be added to the file name. " \
-                                 "Extention will be .csv")
+                            help="specifies a primary data file name. In real time mode, optional, " \
+                                 "in simulation mode, mandatory. A YYYY-MM-DD-HH-MM-SS suffix will be added to the file " \
+                                 "name. Extension will be .csv")
         parser.add_argument("-s", "--secondary", nargs="?", default="secondary",
-                            help="secondary data file name. A YYYY-MM-DD suffix will be added to the file name. " \
-                                 "Extention will be .csv")
+                            help="specifies an optional secondary data file name. The YYYY-MM-DD-HH-MM-SS suffix of the " \
+                                 "source primary data file name will be added to the secondary file name. " \
+                                 "Extension will be .csv")
+        parser.add_argument("-v", action='store_true',
+                            help="verbose flag. If -v is specified, C2 outputs in the console each received/handled data " \
+                                 "element ")
         args = parser.parse_args(argList)
 
-        return args.mode, args.primary, args.secondary
+        return args.m, args.primary, args.secondary, args.v
 
     def start(self, commandLineArgs=None):
         '''
@@ -77,7 +82,7 @@ class Controller:
         else:
             isUnitTestMode = True
 
-        executionMode, primaryFileName, secondaryFileName = self.getCommandLineArgs(commandLineArgs)
+        executionMode, primaryFileName, secondaryFileName, isVerbose = self.getCommandLineArgs(commandLineArgs)
         localNow = arrow.now(LOCAL_TIME_ZONE)
 
         if executionMode.upper() == 'R':
@@ -88,7 +93,7 @@ class Controller:
             self.datasource = BinanceDatasource(tradingPair)
             dateTimeStr = localNow.format(self.DATE_TIME_FORMAT_ARROW)
             self.primaryDataFileName = self.buildPrimaryFileName(primaryFileName, dateTimeStr)
-            self.datasource.addObserver(Archiver(self.primaryDataFileName))
+            self.datasource.addObserver(Archiver(self.primaryDataFileName, isVerbose))
             self.datasource.startDataReception()
 
             if not isUnitTestMode:
@@ -104,7 +109,7 @@ class Controller:
             dateTimeStr = self.extractDateTimeStrFrom(primaryFileName)
             csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
             self.datasource = ArchivedDatasource(primaryFileName)
-            self.datasource.addObserver(Notifyer(csvSecondaryDataFileName))
+            self.datasource.addObserver(Notifyer(csvSecondaryDataFileName, isVerbose))
             self.datasource.processArchivedData()
 
     def buildPrimaryFileName(self, primaryFileName, dateSuffix):
