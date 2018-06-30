@@ -59,13 +59,6 @@ class TestController(unittest.TestCase):
                 self.assertEqual(i, j)
 
 
-    def testExtractDateTimeStrFrom(self):
-        controller = Controller()
-        csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
-
-        self.assertEqual("2018-06-28-22-41-05", controller.extractDateTimeStrFrom(csvPrimaryDataFileName))
-
-
     def testBuildPrimaryFileName(self):
         dateTimeStr = "2018-06-28 22-41-05"
         controller = Controller()

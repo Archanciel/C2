@@ -9,6 +9,11 @@ sys.path.insert(0,parentdir)
 from utility.patternmatcher import PatternMatcher
 
 class TestPatternMatcher(unittest.TestCase):
+    def testExtractDateTimeStrFrom(self):
+        csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
+
+        self.assertEqual("2018-06-28-22-41-05", PatternMatcher.extractDateTimeStrFrom(csvPrimaryDataFileName))
+
     def testGetDurationSS(self):
         durationStr = '22'
         durationTuple = PatternMatcher.getDurationStrTuple(durationStr)

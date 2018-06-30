@@ -1,11 +1,11 @@
 import sys
 import argparse
 import arrow
-import re
 from observable.binancedatasource import BinanceDatasource
 from observable.archiveddatasource import ArchivedDatasource
 from observer.archiver import Archiver
 from observer.notifyer import Notifyer
+from utility.patternmatcher import PatternMatcher
 
 
 VERSION_NUMBER = "0.4"
@@ -124,7 +124,7 @@ class Controller:
             self.datasource.processArchivedData()
 
     def buildSecondaryFileNameFromPrimaryFileName(self, primaryFileName, secondaryFileName):
-        dateTimeStr = self.extractDateTimeStrFrom(primaryFileName)
+        dateTimeStr = PatternMatcher.extractDateTimeStrFrom(primaryFileName)
         csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
 
         return csvSecondaryDataFileName
@@ -132,16 +132,6 @@ class Controller:
     def buildPrimaryFileName(self, primaryFileName, dateSuffix):
         return "{}-{}.csv".format(primaryFileName, dateSuffix)
 
-    def extractDateTimeStrFrom(self, primaryFileName):
-        pattern = r"(\w*)-([0-9-]*).csv"
-
-        match = re.match(pattern, primaryFileName)
-
-        if match:
-            dateTimeStr = match.group(2)
-
-            return dateTimeStr
-        
     def stop(self):
         '''
         Stop the data stream.

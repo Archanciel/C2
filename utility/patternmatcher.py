@@ -6,6 +6,17 @@ class PatternMatcher:
     '''
 
     @staticmethod
+    def extractDateTimeStrFrom(primaryFileName):
+        pattern = r"(\w*)-([0-9-]*).csv"
+
+        match = re.match(pattern, primaryFileName)
+
+        if match:
+            dateTimeStr = match.group(2)
+
+            return dateTimeStr
+
+    @staticmethod
     def getDurationStrTuple(durationStr):
         '''
         Parses a duraton string like 22 for 22 seconds or 7-22 for 7 minutes 22 seconds
