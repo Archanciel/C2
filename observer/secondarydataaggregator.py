@@ -1,7 +1,7 @@
 from observer.observer import Observer
 from observer.archiver import Archiver
 
-class Notifyer(Observer):
+class SecondaryDataAggregator(Observer):
     '''
     This class ...
     '''
@@ -35,4 +35,4 @@ class Notifyer(Observer):
         object's observers of the change.
         '''
         self.archiver.close()
-        print('Notifyer closed')
+        print('SecondaryDataAggregator closed')

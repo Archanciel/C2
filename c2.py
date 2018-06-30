@@ -4,7 +4,7 @@ import arrow
 from observable.binancedatasource import BinanceDatasource
 from observable.archiveddatasource import ArchivedDatasource
 from observer.archiver import Archiver
-from observer.notifyer import Notifyer
+from observer.secondarydataaggregator import SecondaryDataAggregator
 from utility.patternmatcher import PatternMatcher
 
 
@@ -103,7 +103,7 @@ class Controller:
             #them to the Criterion
             csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
             #forcing isVerbose to False to avoid interfering with Archiver verbosity !
-            self.datasource.addObserver(Notifyer(csvSecondaryDataFileName, isVerbose=False))
+            self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose=False))
 
             self.datasource.startDataReception()
 
@@ -120,7 +120,7 @@ class Controller:
             csvSecondaryDataFileName = self.buildSecondaryFileNameFromPrimaryFileName(primaryFileName,
                                                                                       secondaryFileName)
             self.datasource = ArchivedDatasource(primaryFileName)
-            self.datasource.addObserver(Notifyer(csvSecondaryDataFileName, isVerbose))
+            self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose))
             self.datasource.processArchivedData()
 
     def buildSecondaryFileNameFromPrimaryFileName(self, primaryFileName, secondaryFileName):

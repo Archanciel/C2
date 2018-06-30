@@ -9,7 +9,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 from observable.archiveddatasource import ArchivedDatasource
-from observer.notifyer import Notifyer
+from observer.secondarydataaggregator import SecondaryDataAggregator
 
 class TestArchivedDatasource(unittest.TestCase):
 
@@ -17,7 +17,7 @@ class TestArchivedDatasource(unittest.TestCase):
         csvPrimaryDataFileName = "../primary.csv"
         csvSecondaryDataFileName = "secondary.csv"
         archivedDatasource = ArchivedDatasource(csvPrimaryDataFileName)
-        archivedDatasource.addObserver(Notifyer(csvSecondaryDataFileName, isVerbose=False))
+        archivedDatasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose=False))
         archivedDatasource.processArchivedData()
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
