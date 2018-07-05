@@ -58,6 +58,7 @@ class TestController(unittest.TestCase):
                     pass
                 self.assertEqual(i, j)
 
+        os.remove(csvSecondaryDataFileName)
 
     def testBuildPrimaryFileName(self):
         dateTimeStr = "2018-06-28 22-41-05"

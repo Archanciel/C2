@@ -29,6 +29,7 @@ class TestArchivedDatasource(unittest.TestCase):
                     pass
                 self.assertEqual(i, j)
 
+        os.remove(csvSecondaryDataFileName)
 
 if __name__ == '__main__':
     unittest.main()
