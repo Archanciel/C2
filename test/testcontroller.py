@@ -42,7 +42,6 @@ class TestController(unittest.TestCase):
         csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
         csvSecondaryDataFileName = "secondary-2018-06-28-22-41-05.csv"
         controller = Controller()
-        print("running c2 in simulation mode")
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
@@ -59,6 +58,40 @@ class TestController(unittest.TestCase):
                 self.assertEqual(i, j)
 
         os.remove(csvSecondaryDataFileName)
+
+
+    def testStartModeSimulationNoPrimaryFileSpecification(self):
+        csvPrimaryDataFileName = "primary.csv"
+        csvSecondaryDataFileName = "secondary-2018-06-28-22-41-05.csv"
+        controller = Controller()
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        errorMsg = controller.start(['-ms', '-s{}'.format(csvSecondaryDataFileName)])
+
+        self.assertEqual(errorMsg, "ERROR - in simulation mode, a primary file name must be provided !")
+
+
+    def testStartModeSimulationPrimaryFileWithNoDateSpecification(self):
+        csvPrimaryDataFileName = "../primary.csv"
+        csvSecondaryDataFileName = "secondary.csv"
+        controller = Controller()
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
+        controller.stop()
+
+        self.assertTrue(os.path.isfile(csvSecondaryDataFileName))
+        with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
+            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+                i, j = 0, 0
+                for i, _ in enumerate(csvPrimaryFile):
+                    pass
+                for j, _ in enumerate(csvSecondaryFile):
+                    pass
+                self.assertEqual(i, j)
+
+        os.remove(csvSecondaryDataFileName)
+
 
     def testBuildPrimaryFileName(self):
         dateTimeStr = "2018-06-28 22-41-05"

@@ -73,7 +73,7 @@ class Controller:
         Start the data stream.
 
         :param commandLineArgs: used only for unit testing only
-        :return:
+        :return: error message if relevant
         '''
         isUnitTestMode = False
 
@@ -117,6 +117,12 @@ class Controller:
                         sys.exit(0)  # required for the program to exit !
         else:
             #C2 executing in simulation mode ...
+            if primaryFileName == 'primary':
+                errorMsg = "ERROR - in simulation mode, a primary file name must be provided !"
+                print(errorMsg)
+
+                return errorMsg
+
             csvSecondaryDataFileName = self.buildSecondaryFileNameFromPrimaryFileName(primaryFileName,
                                                                                       secondaryFileName)
             self.datasource = ArchivedDatasource(primaryFileName)
@@ -125,7 +131,10 @@ class Controller:
 
     def buildSecondaryFileNameFromPrimaryFileName(self, primaryFileName, secondaryFileName):
         dateTimeStr = PatternMatcher.extractDateTimeStrFrom(primaryFileName)
-        csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
+        if dateTimeStr:
+            csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
+        else:
+            csvSecondaryDataFileName = "{}.csv".format(secondaryFileName)
 
         return csvSecondaryDataFileName
 
