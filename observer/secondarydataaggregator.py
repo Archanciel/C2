@@ -24,7 +24,7 @@ class SecondaryDataAggregator(Observer):
         self.archiver.update(data)
 
         if self.isVerbose:
-            print('Notifyer: ', end='')
+            print('SecondaryDataAggregator: ', end='')
             print(data)
 
 
