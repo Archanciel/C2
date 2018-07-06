@@ -6,7 +6,7 @@ import sys
 
 class ApiKeyFileGenerator:
     # FILE_PATH = "sdcard/"
-    FILE_PATH = "D:/Users/Jean-Pierre/Downloads/"  # if executed on Windows
+    FILE_PATH = "D:/Users/Philippe/Downloads/"  # if executed on Windows
 
     def getCommandLineArgs(self, argList):
         '''
