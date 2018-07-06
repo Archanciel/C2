@@ -7,7 +7,6 @@ from observer.archiver import Archiver
 from observer.secondarydataaggregator import SecondaryDataAggregator
 from utility.patternmatcher import PatternMatcher
 
-
 VERSION_NUMBER = "0.4"
 LOCAL_TIME_ZONE = 'Europe/Zurich'
 
@@ -16,6 +15,8 @@ class Controller:
     This class is the entry point of the C2 application.
     '''
     DATE_TIME_FORMAT_ARROW = 'YYYY-MM-DD-HH-mm-ss'
+    DEFAULT_PRIMARY_FILENAME = 'primary'
+    DEFAULT_SECONDARY_FILENAME = 'secondary'
 
     def __init__(self):
         '''
@@ -53,11 +54,11 @@ class Controller:
         )
         parser.add_argument("-m", choices=['r', 's'], required=True,
                             help="specifies the mode, r for real time, s for simulation")
-        parser.add_argument("-p", "--primary", nargs="?", default="primary",
+        parser.add_argument("-p", "--primary", nargs="?", default=self.DEFAULT_PRIMARY_FILENAME,
                             help="specifies a primary data file name. In real time mode, optional, " \
                                  "in simulation mode, mandatory. A YYYY-MM-DD-HH-MM-SS suffix will be added to the file " \
                                  "name. Extension will be .csv")
-        parser.add_argument("-s", "--secondary", nargs="?", default="secondary",
+        parser.add_argument("-s", "--secondary", nargs="?", default=self.DEFAULT_SECONDARY_FILENAME,
                             help="specifies an optional secondary data file name. The YYYY-MM-DD-HH-MM-SS suffix of the " \
                                  "source primary data file name will be added to the secondary file name. " \
                                  "Extension will be .csv")
@@ -117,7 +118,7 @@ class Controller:
                         sys.exit(0)  # required for the program to exit !
         else:
             #C2 executing in simulation mode ...
-            if primaryFileName == 'primary':
+            if primaryFileName == self.DEFAULT_PRIMARY_FILENAME:
                 errorMsg = "ERROR - in simulation mode, a primary file name must be provided !"
                 print(errorMsg)
 
