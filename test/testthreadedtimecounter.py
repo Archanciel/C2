@@ -6,12 +6,12 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 import time
-from utility.timecounter import TimeCounter
+from utility.threadedtimecounter import ThreadedTimeCounter
 
-class TestTimeCounter(unittest.TestCase):
+class TestThreadedTimeCounter(unittest.TestCase):
     def testSplitDurationSecondZeroSS(self):
         duration = 0
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -23,7 +23,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondSomeSS(self):
         duration = 40
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -35,7 +35,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondMMZeroSS(self):
         duration = 60
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -47,7 +47,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondMMSS(self):
         duration = 100
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -59,7 +59,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondHHZeroMMZeroSS(self):
         duration = 3600
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -71,7 +71,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondHHMMSS(self):
         duration = 3700
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -83,7 +83,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondDDZeroHHZeroMMZeroSS(self):
         duration = 86400
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -95,7 +95,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondDDZeroHHZeroMMSS(self):
         duration = 86404
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -107,7 +107,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondDDZeroHHMMSS(self):
         duration = 86504
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -119,7 +119,7 @@ class TestTimeCounter(unittest.TestCase):
 
     def testSplitDurationSecondDDHMMSS(self):
         duration = 90104
-        counter = TimeCounter(durationSecond=duration)
+        counter = ThreadedTimeCounter(durationSecond=duration)
 
         counter.splitDurationSecond(duration)
 
@@ -127,6 +127,32 @@ class TestTimeCounter(unittest.TestCase):
         self.assertEqual(counter.hour, 1)
         self.assertEqual(counter.minute, 1)
         self.assertEqual(counter.second, 44)
+
+
+    def testCountUpUnthreadedMode(self):
+        counter = ThreadedTimeCounter(mode=ThreadedTimeCounter.MODE_COUNT_UP, intervalSecond=1, durationSecond=2)
+        active = True
+
+        while active:
+            active = counter.count()
+
+
+    def testCountDownUnthreadedMode(self):
+        counter = ThreadedTimeCounter(mode=ThreadedTimeCounter.MODE_COUNT_DOWN, intervalSecond=1, durationSecond=2)
+        active = True
+
+        while active:
+            active = counter.count()
+
+
+    def testCountUpThreadedMode(self):
+        counter = ThreadedTimeCounter(mode=ThreadedTimeCounter.MODE_COUNT_UP, intervalSecond=1, durationSecond=2)
+        counter.start()
+
+
+    def testCountDownThreadedMode(self):
+        counter = ThreadedTimeCounter(mode=ThreadedTimeCounter.MODE_COUNT_DOWN, intervalSecond=1, durationSecond=2)
+        counter.start()
 
 
 if __name__ == '__main__':

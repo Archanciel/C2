@@ -3,28 +3,35 @@ from threading import Thread
 import sys
 
 
-class TimeCounter(Thread):
+class ThreadedTimeCounter(Thread):
+    '''
+    This class is a time counter supporting two modes: count down or count up (elapse time). The class
+    can be executed in two ways: either it runs on the thread of its client or on its own thread.
+
+    Here are the ways of using the time counter:
+
+    On client thread (here in count down mode):
+        counter = ThreadedTimeCounter(mode = ThreadedTimeCounter.MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 10)
+        active = True
+
+        while active:
+            active = counter.count()
+
+    On its own thread (here in elapsed time (count up) mode):
+        counter = ThreadedTimeCounter(mode = ThreadedTimeCounter.MODE_COUNT_UP, intervalSecond = 1, durationSecond = 10)
+        counter.start()
+    '''
     MODE_COUNT_UP = 'mode_up'
     MODE_COUNT_DOWN = 'mode_down'
 
     def __init__(self, mode = MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 0):
-        '''
-
-         In case a test list
-        is passed as parm, the printed time string is added to the list.
-        :param mode:
-        :param intervalSecond:
-        :param durationSecond:
-        :param testTimeStrList: is value not None, the printed time string is appended to it
-        '''
         Thread.__init__(self)
         self.mode = mode
 
-        if mode == TimeCounter.MODE_COUNT_DOWN:
+        if mode == ThreadedTimeCounter.MODE_COUNT_DOWN:
             self.totalSecond = durationSecond
-            self.modeString = 'Time remaining:'
             self.splitDurationSecond(durationSecond)
-            self.initialCountDownTimeStr = ' (from {:02d} {:02d}:{:02d}:{:02d})'.format(self.day, self.hour, self.minute, self.second)
+            self.modeString = 'Time remaining from {:02d} {:02d}:{:02d}:{:02d}:'.format(self.day, self.hour, self.minute, self.second)
         else:
             self.totalSecond = 0
             self.modeString = 'Time elapsed:'
@@ -61,18 +68,19 @@ class TimeCounter(Thread):
 
     def count(self):
         '''
-        Print a DD HH:MM:SS count down or elapsed time string in the console.
+        Print a DD HH:MM:SS count down or elapsed time string in the console. Print occurs on the
+        same line in overwriting mode.
 
         :return:
         '''
         time.sleep(self.intervalSecond)
 
-        if self.mode == TimeCounter.MODE_COUNT_UP:
+        if self.mode == ThreadedTimeCounter.MODE_COUNT_UP:
             active = self.countUp()
         else:
             active = self.countDown()
 
-        timeStr = '\r{} {:02d} {:02d}:{:02d}:{:02d}{}'.format(self.modeString, self.day, self.hour, self.minute, self.second, self.initialCountDownTimeStr)
+        timeStr = '\r{} {:02d} {:02d}:{:02d}:{:02d}'.format(self.modeString, self.day, self.hour, self.minute, self.second)
 #        print(timeStr, end='')
         sys.stdout.write(timeStr)
         sys.stdout.flush()
@@ -103,7 +111,7 @@ class TimeCounter(Thread):
 
 
 if __name__ == '__main__':
-    counter = TimeCounter(mode = TimeCounter.MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 10)
+    counter = ThreadedTimeCounter(mode = ThreadedTimeCounter.MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 10)
     active = True
 
     while active:
@@ -111,7 +119,7 @@ if __name__ == '__main__':
 
     print()
 
-    counter = TimeCounter(mode = TimeCounter.MODE_COUNT_UP, intervalSecond = 1, durationSecond = 10)
+    counter = ThreadedTimeCounter(mode = ThreadedTimeCounter.MODE_COUNT_UP, intervalSecond = 1, durationSecond = 10)
     active = True
 
     while active:
@@ -119,5 +127,5 @@ if __name__ == '__main__':
 
     print()
 
-    counter = TimeCounter(mode = TimeCounter.MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 10)
+    counter = ThreadedTimeCounter(mode = ThreadedTimeCounter.MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 10)
     counter.start()
