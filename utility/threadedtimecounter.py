@@ -24,9 +24,10 @@ class ThreadedTimeCounter(Thread):
     MODE_COUNT_UP = 'mode_up'
     MODE_COUNT_DOWN = 'mode_down'
 
-    def __init__(self, mode = MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 0):
+    def __init__(self, mode = MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 0, client = None):
         Thread.__init__(self)
         self.mode = mode
+        self.client = client
 
         if mode == ThreadedTimeCounter.MODE_COUNT_DOWN:
             self.totalSecond = durationSecond
@@ -47,9 +48,15 @@ class ThreadedTimeCounter(Thread):
 
     def run(self):
         active = True
+        self.wasStopped = False
 
-        while active:
+        while active and not self.wasStopped:
             active = self.count()
+
+        if self.client:
+            print()
+            if not self.client.wasStopped():
+                self.client.stop()
 
     def splitDurationSecond(self, durationSecond):
         '''
@@ -110,7 +117,12 @@ class ThreadedTimeCounter(Thread):
             return True
 
 
+    def stop(self):
+        self.wasStopped = True
+
+
 if __name__ == '__main__':
+    #client thread mode
     counter = ThreadedTimeCounter(mode = ThreadedTimeCounter.MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 10)
     active = True
 
@@ -127,5 +139,6 @@ if __name__ == '__main__':
 
     print()
 
+    #own thread mode
     counter = ThreadedTimeCounter(mode = ThreadedTimeCounter.MODE_COUNT_DOWN, intervalSecond = 1, durationSecond = 10)
     counter.start()

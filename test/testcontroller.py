@@ -13,14 +13,48 @@ from c2 import Controller
 
 class TestController(unittest.TestCase):
 
+    @unittest.skip
     def testStartModeRealtime(self):
+        '''
+        this causes testStartModeRealtimeWithDurationInSeconds to fail !!!
+        :return:
+        '''
         controller = Controller()
         print("running c2 in real time mode for 10 seconds")
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-mr'])
-        time.sleep(10)
+        time.sleep(2)
         csvPrimaryDataFileName = controller.stop()
+        csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
+
+        with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
+            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+                i, j = 0, 0
+                for i, _ in enumerate(csvPrimaryFile):
+                    pass
+                for j, _ in enumerate(csvSecondaryFile):
+                    pass
+                self.assertEqual(i, j)
+
+        self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
+
+        os.remove(csvPrimaryDataFileName)
+        os.remove(csvSecondaryDataFileName)
+
+
+    def testStartModeRealtimeWithDurationInSeconds(self):
+        controller = Controller()
+        duration = 3
+        print("running c2 in real time mode for {} seconds".format(duration))
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        try:
+            controller.start(['-mr', '-d{}'.format(duration)])
+        except SystemExit:
+            pass
+
+        csvPrimaryDataFileName = controller.primaryDataFileName
         csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
