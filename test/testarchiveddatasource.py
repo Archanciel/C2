@@ -10,6 +10,7 @@ sys.path.insert(0,parentdir)
 
 from observable.archiveddatasource import ArchivedDatasource
 from observer.secondarydataaggregator import SecondaryDataAggregator
+from observer.observer import Observer
 
 class TestArchivedDatasource(unittest.TestCase):
 
@@ -30,6 +31,26 @@ class TestArchivedDatasource(unittest.TestCase):
                 self.assertEqual(i, j)
 
         os.remove(csvSecondaryDataFileName)
+
+
+    def testProcessArchivedDataValues(self):
+        csvPrimaryDataFileName = "../primary.csv"
+        archivedDatasource = ArchivedDatasource(csvPrimaryDataFileName)
+
+        class TestObserver(Observer):
+            def __init__(self):
+                self.receivedDataList = []
+            def update(self, arg):
+                self.receivedDataList.append(arg)
+            def close(self):
+                pass
+
+        tstObserver = TestObserver()
+        archivedDatasource.addObserver(tstObserver)
+        archivedDatasource.processArchivedData()
+
+        self.assertEqual(tstObserver.receivedDataList[0], ('1','1530201849627', '6103.0', '0.100402'))
+        self.assertEqual(tstObserver.receivedDataList[1], ('2','1530201851230', '6103.99', '0.03'))
 
 if __name__ == '__main__':
     unittest.main()

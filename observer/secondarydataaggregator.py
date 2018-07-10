@@ -19,7 +19,12 @@ class SecondaryDataAggregator(Observer):
 
 
     def update(self, data):
-        timestampMilliSec, priceFloat, volumeFloat = data
+        if len(data) == 4:
+            # data comming from archive file (mode simulation)
+            recordIndex, timestampMilliSec, priceFloat, volumeFloat = data
+        else:
+            # data comming from exchange (mode real time)
+            timestampMilliSec, priceFloat, volumeFloat = data
 
         self.archiver.update(data)
 

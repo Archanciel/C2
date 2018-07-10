@@ -22,11 +22,12 @@ class ArchivedDatasource(Observable):
 
     def processArchivedData(self):
         for row in self.reader:
-            timestampMilliSec = row[0]
-            priceFloat = row[1]
-            volumeFloat = row[2]
+            recordIndex = row[0]
+            timestampMilliSec = row[1]
+            priceFloat = row[2]
+            volumeFloat = row[3]
 
-            self.notifyObservers((timestampMilliSec, priceFloat, volumeFloat))
+            self.notifyObservers((recordIndex, timestampMilliSec, priceFloat, volumeFloat))
 
         self.file.close()
         super().stopObservable()
