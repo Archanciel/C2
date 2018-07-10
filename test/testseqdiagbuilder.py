@@ -45,12 +45,12 @@ class Egg:
 
 class LeafOne:
     def i(self):
-        SeqDiagBuilder.recordFlow(3)
+        SeqDiagBuilder.recordFlow()
 
 
 class LeafTwo:
     def j(self):
-        SeqDiagBuilder.recordFlow(3)
+        SeqDiagBuilder.recordFlow()
 
 
 class Client:

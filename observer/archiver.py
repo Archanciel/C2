@@ -1,4 +1,5 @@
 from observer.observer import Observer
+from documentation.seqdiagbuilder import SeqDiagBuilder
 import csv
 
 class Archiver(Observer):
@@ -38,6 +39,7 @@ class Archiver(Observer):
         if self.isVerbose:
             print(data)
 
+        SeqDiagBuilder.recordFlow()
 
     def close(self):
         '''

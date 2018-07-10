@@ -1,5 +1,6 @@
 from observer.observer import Observer
 from observer.archiver import Archiver
+from documentation.seqdiagbuilder import SeqDiagBuilder
 
 class SecondaryDataAggregator(Observer):
     '''
@@ -31,6 +32,8 @@ class SecondaryDataAggregator(Observer):
         if self.isVerbose:
             print('SecondaryDataAggregator: ', end='')
             print(data)
+
+        SeqDiagBuilder.recordFlow()
 
 
     def close(self):
