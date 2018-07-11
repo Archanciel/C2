@@ -6,3 +6,4 @@
 *.csv
 /utility/__pycache__
 /test/__init__.py
+*.pyc
