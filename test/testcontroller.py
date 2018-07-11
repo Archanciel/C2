@@ -177,6 +177,17 @@ class TestController(unittest.TestCase):
         os.remove(csvSecondaryDataFileName)
 
 
+    def testStartModeSimulationPrimaryFileNotExist(self):
+        csvPrimaryDataFileName = "../primary.cs"
+        csvSecondaryDataFileName = "secondary.csv"
+        controller = Controller()
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        errorMsg = controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
+
+        self.assertTrue("ERROR - specified file ../primary.cs not found !", errorMsg)
+
+
     def testBuildPrimaryFileName(self):
         dateTimeStr = "2018-06-28 22-41-05"
         controller = Controller()
