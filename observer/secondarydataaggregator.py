@@ -20,6 +20,8 @@ class SecondaryDataAggregator(Observer):
 
 
     def update(self, data):
+        recordIndex = ''
+
         if len(data) == 4:
             # data comming from archive file (mode simulation)
             recordIndex, timestampMilliSec, priceFloat, volumeFloat = data
@@ -30,8 +32,7 @@ class SecondaryDataAggregator(Observer):
         self.archiver.update(data)
 
         if self.isVerbose:
-            print('SecondaryDataAggregator: ', end='')
-            print(data)
+            print("SecondaryDataAggregator: {} {} {} {}".format(recordIndex, timestampMilliSec, priceFloat, volumeFloat))
 
         SeqDiagBuilder.recordFlow()
 

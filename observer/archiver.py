@@ -37,7 +37,7 @@ class Archiver(Observer):
         self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat])
 
         if self.isVerbose:
-            print(data)
+            print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat))
 
         SeqDiagBuilder.recordFlow()
 
