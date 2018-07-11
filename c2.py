@@ -1,13 +1,16 @@
 import sys
 import argparse
 import arrow
+import msvcrt   # only ok on Windows !
+
 from observable.binancedatasource import BinanceDatasource
 from observable.archiveddatasource import ArchivedDatasource
 from observer.archiver import Archiver
 from observer.secondarydataaggregator import SecondaryDataAggregator
 from utility.patternmatcher import PatternMatcher
+from utility.threadedtimecounter import ThreadedTimeCounter
 
-VERSION_NUMBER = "0.4"
+VERSION_NUMBER = "0.5"
 LOCAL_TIME_ZONE = 'Europe/Zurich'
 
 class Controller:
@@ -27,6 +30,8 @@ class Controller:
         self.datasource = None
         self.primaryDataFileName = None
         self.secondaryDataFileName = None
+        self.stopped = False
+
 
     def getCommandLineArgs(self, argList):
         '''
@@ -54,6 +59,8 @@ class Controller:
         )
         parser.add_argument("-m", choices=['r', 's'], required=True,
                             help="specifies the mode, r for real time, s for simulation")
+        parser.add_argument("-d", "--duration", nargs="?",
+                            help="specifies the duration of the real time data reception in seconds")
         parser.add_argument("-p", "--primary", nargs="?", default=self.DEFAULT_PRIMARY_FILENAME,
                             help="specifies a primary data file name. In real time mode, optional, " \
                                  "in simulation mode, mandatory. A YYYY-MM-DD-HH-MM-SS suffix will be added to the file " \
@@ -67,7 +74,7 @@ class Controller:
                                  "element ")
         args = parser.parse_args(argList)
 
-        return args.m, args.primary, args.secondary, args.v
+        return args.m, args.duration, args.primary, args.secondary, args.v
 
     def start(self, commandLineArgs=None):
         '''
@@ -85,13 +92,13 @@ class Controller:
         else:
             isUnitTestMode = True
 
-        executionMode, primaryFileName, secondaryFileName, isVerbose = self.getCommandLineArgs(commandLineArgs)
+        executionMode, durationStr, primaryFileName, secondaryFileName, isVerbose = self.getCommandLineArgs(commandLineArgs)
         localNow = arrow.now(LOCAL_TIME_ZONE)
 
         if executionMode.upper() == 'R':
             #C2 executing in real time mode ...
             tradingPair = 'BTCUSDT'
-            print('Starting the Binance aggregate trade stream for pair {}. Type s to stop the stream ...'.format(
+            print('Starting the Binance aggregate trade stream for pair {}. Type any key to stop the stream ...'.format(
                 tradingPair))
             self.datasource = BinanceDatasource(tradingPair)
             dateTimeStr = localNow.format(self.DATE_TIME_FORMAT_ARROW)
@@ -107,15 +114,31 @@ class Controller:
             self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose=False))
 
             self.datasource.startDataReception()
+            counter = None
 
-            if not isUnitTestMode:
+            if durationStr:
+                counter = ThreadedTimeCounter(ThreadedTimeCounter.MODE_COUNT_DOWN, \
+                                              intervalSecond=1, \
+                                              durationSecond=self.getDurationSeconds(durationStr), \
+                                              client=self)
+
+            if not isUnitTestMode or durationStr != None:
                 #here, we are not in unit test mode and we have to wait for the user to
                 #stop receiving the real time data
-                while True:
-                    if input() == 's':
-                        print('Stopping the stream ...')
+
+                if counter:
+                    counter.start()
+
+                while not self.stopped:
+                    if msvcrt.kbhit():
+                        if counter:
+                            counter.stop()
+                            print('\nStopping the stream ...')
+                        else:
+                            print('Stopping the stream ...')
                         c2.stop()
-                        sys.exit(0)  # required for the program to exit !
+
+                sys.exit(0)  # required for the program to exit !
         else:
             #C2 executing in simulation mode ...
             if primaryFileName == self.DEFAULT_PRIMARY_FILENAME:
@@ -130,6 +153,9 @@ class Controller:
             self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose))
             self.datasource.processArchivedData()
 
+    def getDurationSeconds(self, durationStr):
+        return int(durationStr)
+
     def buildSecondaryFileNameFromPrimaryFileName(self, primaryFileName, secondaryFileName):
         dateTimeStr = PatternMatcher.extractDateTimeStrFrom(primaryFileName)
         if dateTimeStr:
@@ -139,8 +165,10 @@ class Controller:
 
         return csvSecondaryDataFileName
 
+
     def buildPrimaryFileName(self, primaryFileName, dateSuffix):
         return "{}-{}.csv".format(primaryFileName, dateSuffix)
+
 
     def stop(self):
         '''
@@ -148,7 +176,14 @@ class Controller:
         :return: created primary csv file name if started in real time mode
         '''
         self.datasource.stopObservable()
+        self.stopped = True
+
         return self.primaryDataFileName
+
+
+    def wasStopped(self):
+        return self.stopped
+
 
 if __name__ == '__main__':
     tradingPair = 'BTCUSDT'

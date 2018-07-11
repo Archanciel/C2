@@ -1,5 +1,6 @@
 from observer.observer import Observer
 from observer.archiver import Archiver
+from documentation.seqdiagbuilder import SeqDiagBuilder
 
 class SecondaryDataAggregator(Observer):
     '''
@@ -19,13 +20,20 @@ class SecondaryDataAggregator(Observer):
 
 
     def update(self, data):
-        timestampMilliSec, priceFloat, volumeFloat = data
+        if len(data) == 4:
+            # data comming from archive file (mode simulation)
+            recordIndex, timestampMilliSec, priceFloat, volumeFloat = data
+        else:
+            # data comming from exchange (mode real time)
+            timestampMilliSec, priceFloat, volumeFloat = data
 
         self.archiver.update(data)
 
         if self.isVerbose:
             print('SecondaryDataAggregator: ', end='')
             print(data)
+
+        SeqDiagBuilder.recordFlow()
 
 
     def close(self):

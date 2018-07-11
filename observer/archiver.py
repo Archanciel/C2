@@ -1,8 +1,9 @@
 from observer.observer import Observer
+from documentation.seqdiagbuilder import SeqDiagBuilder
 import csv
 
 class Archiver(Observer):
-    CSV_ROW_HEADER = ["MS TIMESTAMP", "PRICE", "VOLUME"]
+    CSV_ROW_HEADER = ["INDEX", "MS TIMESTAMP", "PRICE", "VOLUME"]
 
     '''
     This class stores the received data into a csv file.
@@ -22,15 +23,23 @@ class Archiver(Observer):
         self.writer = csv.writer(self.file)
         self.writer.writerow(self.CSV_ROW_HEADER)
         self.isVerbose = isVerbose
+        self.recordIndex = 0
 
     def update(self, data):
-        timestampMilliSec, priceFloat, volumeFloat = data
+        if len(data) == 4:
+            # data comming from archive file (mode simulation)
+            self.recordIndex, timestampMilliSec, priceFloat, volumeFloat = data
+        else:
+            # data comming from exchange (mode real time)
+            timestampMilliSec, priceFloat, volumeFloat = data
+            self.recordIndex += 1
 
-        self.writer.writerow([timestampMilliSec, priceFloat, volumeFloat])
+        self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat])
 
         if self.isVerbose:
             print(data)
 
+        SeqDiagBuilder.recordFlow()
 
     def close(self):
         '''

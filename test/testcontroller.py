@@ -10,16 +10,22 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 from c2 import Controller
+from documentation.seqdiagbuilder import SeqDiagBuilder
 
 class TestController(unittest.TestCase):
 
+    @unittest.skip
     def testStartModeRealtime(self):
+        '''
+        this causes testStartModeRealtimeWithDurationInSeconds to fail !!!
+        :return:
+        '''
         controller = Controller()
         print("running c2 in real time mode for 10 seconds")
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-mr'])
-        time.sleep(10)
+        time.sleep(2)
         csvPrimaryDataFileName = controller.stop()
         csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
 
@@ -36,6 +42,63 @@ class TestController(unittest.TestCase):
 
         os.remove(csvPrimaryDataFileName)
         os.remove(csvSecondaryDataFileName)
+
+
+    def testStartModeRealtimeWithDurationInSeconds(self):
+        controller = Controller()
+        duration = 3
+        print("running c2 in real time mode for {} seconds".format(duration))
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        try:
+            controller.start(['-mr', '-d{}'.format(duration)])
+        except SystemExit:
+            pass
+
+        csvPrimaryDataFileName = controller.primaryDataFileName
+        csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
+
+        with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
+            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+                i, j = 0, 0
+                for i, _ in enumerate(csvPrimaryFile):
+                    pass
+                for j, _ in enumerate(csvSecondaryFile):
+                    pass
+                self.assertEqual(i, j)
+
+        self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
+
+        os.remove(csvPrimaryDataFileName)
+        os.remove(csvSecondaryDataFileName)
+
+
+    @unittest.skip
+    def testStartModeRealtimeWithDurationInSecondsBuildSeqDiag(self):
+        controller = Controller()
+        duration = 3
+        print("running c2 in real time mode for {} seconds".format(duration))
+
+        SeqDiagBuilder.activate('Controller', 'start')  # activate sequence diagram building
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        try:
+            controller.start(['-mr', '-d{}'.format(duration)])
+        except SystemExit:
+            pass
+
+        csvPrimaryDataFileName = controller.primaryDataFileName
+        csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
+
+        os.remove(csvPrimaryDataFileName)
+        os.remove(csvSecondaryDataFileName)
+
+        commands = SeqDiagBuilder.createSeqDiaqCommands('USER')
+
+        with open("c:\\temp\\ess.txt", "w") as f:
+            f.write(commands)
+
+        SeqDiagBuilder.deactivate()  # deactivate sequence diagram building
 
 
     def testStartModeSimulation(self):
@@ -59,6 +122,27 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
+
+    @unittest.skip
+    def testStartModeSimulationBuildSeqDiag(self):
+        csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
+        csvSecondaryDataFileName = "secondary-2018-06-28-22-41-05.csv"
+        controller = Controller()
+
+        SeqDiagBuilder.activate('Controller', 'start')  # activate sequence diagram building
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
+        controller.stop()
+
+        os.remove(csvSecondaryDataFileName)
+
+        commands = SeqDiagBuilder.createSeqDiaqCommands('USER')
+
+        with open("c:\\temp\\ess.txt", "w") as f:
+            f.write(commands)
+
+        SeqDiagBuilder.deactivate()  # deactivate sequence diagram building
 
     def testStartModeSimulationNoPrimaryFileSpecification(self):
         csvPrimaryDataFileName = "primary.csv"
