@@ -149,7 +149,13 @@ class Controller:
 
             csvSecondaryDataFileName = self.buildSecondaryFileNameFromPrimaryFileName(primaryFileName,
                                                                                       secondaryFileName)
-            self.datasource = ArchivedDatasource(primaryFileName)
+            try:
+                self.datasource = ArchivedDatasource(primaryFileName)
+            except FileNotFoundError as e:
+                errorMsg = "ERROR - specified file {} not found !".format(e.filename)
+                print(errorMsg)
+                return errorMsg
+
             self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose))
             self.datasource.processArchivedData()
 
