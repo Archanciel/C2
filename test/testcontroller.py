@@ -84,6 +84,7 @@ class TestController(unittest.TestCase):
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         try:
             controller.start(['-mr', '-d{}'.format(duration)])
+            time.sleep(duration)
         except SystemExit:
             pass
 
