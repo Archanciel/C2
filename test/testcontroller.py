@@ -129,8 +129,10 @@ class TestController(unittest.TestCase):
         csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
         csvSecondaryDataFileName = "secondary-2018-06-28-22-41-05.csv"
         controller = Controller()
+        projectPath = 'D:\\Development\\Python\\C2'
 
-        SeqDiagBuilder.activate('Controller', 'start')  # activate sequence diagram building
+
+        SeqDiagBuilder.activate(projectPath, 'Controller', 'start')  # activate sequence diagram building
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
@@ -138,12 +140,12 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
-        commands = SeqDiagBuilder.createSeqDiaqCommands('USER')
+ #       commands = SeqDiagBuilder.createSeqDiaqCommands('USER')
 
-        with open("c:\\temp\\ess.txt", "w") as f:
-            f.write(commands)
+  #      with open("c:\\temp\\ess.txt", "w") as f:
+  #          f.write(commands)
 
-        SeqDiagBuilder.deactivate()  # deactivate sequence diagram building
+ #       SeqDiagBuilder.deactivate()  # deactivate sequence diagram building
 
     def testStartModeSimulationNoPrimaryFileSpecification(self):
         csvPrimaryDataFileName = "primary.csv"
