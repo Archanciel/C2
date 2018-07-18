@@ -1,6 +1,7 @@
 import traceback, re, ast, importlib, inspect
 import webbrowser
 import os
+import copy
 from inspect import signature
 import collections
 
@@ -360,9 +361,35 @@ class SeqDiagCommandStack:
 
 class ConstructorArgsProvider:
     def __init__(self, classArgDic):
+        '''
+
+        :param classArgDic: class cnstructor arguments dictionary
+                            classArgDic format:
+                                {
+                                    'classNameA_usage_2': ['a_arg21', 'a_arg22'], #args used at second instanciation
+                                    'classNameA_usage_1': ['a_arg11', 'a_arg12'], #args used at first instanciation
+                                    'classNameB': ['b_arg1']
+                                    'classNameC_usage_1': ['c_arg1'],
+                                    'classNameC_usage_3': ['c_arg3'],
+                                    'classNameC_usage_2': ['c_arg2']
+                                }
+        '''
         self.classArgDic = classArgDic
 
+        # making a copy of the classArgDic so it can be added to a warning message to make it clearer.
+        # Doing a deep copy does not seem necessary for now, but in the future ...
+        self.savedClassArgDic = copy.deepcopy(classArgDic)
+
+
     def getArgsForClassConstructor(self, className):
+        '''
+        Return a list containing the ctor arguments for the passed className. If className is
+        not found in the internal classArgDic, None is returned.
+
+        :param className:
+        :return: list containing the ctor arguments in their usage order, None if no entry exist
+                 for the passed className
+        '''
 
         # collecting all the keys in the classArgDic which are for the className.
         # The keys may contain a digit, which indicates that the entry can only be
@@ -412,15 +439,17 @@ class SeqDiagBuilder:
     '''
 
     seqDiagWarningList = []
+    _projectPath = None
     _isActive = False
     _recordFlowCalled = False
-    seqDiagEntryClass = None
-    seqDiagEntryMethod = None
+    _seqDiagEntryClass = None
+    _seqDiagEntryMethod = None
     recordedFlowPath = None
     _participantDocOrderedDic = None
+    _constructorArgProvider = None
 
     @staticmethod
-    def activate(projectPath, entryClass, entryMethod):
+    def activate(projectPath, entryClass, entryMethod, classArgDic = None):
         '''
         Initialise and activate SeqDiagBuilder. This method must be called before calling any method
         on the entry class.
@@ -429,14 +458,28 @@ class SeqDiagBuilder:
                             'D:/Development/Python/seqdiagbuilder'
         :param entryClass:
         :param entryMethod:
+        :param classArgDic: class cnstructor arguments dictionary
+                            classArgDic format:
+                                {
+                                    'classNameA_usage_2': ['a_arg21', 'a_arg22'], #args used at second instanciation
+                                    'classNameA_usage_1': ['a_arg11', 'a_arg12'], #args used at first instanciation
+                                    'classNameB': ['b_arg1']
+                                    'classNameC_usage_1': ['c_arg1'],
+                                    'classNameC_usage_3': ['c_arg3'],
+                                    'classNameC_usage_2': ['c_arg2']
+                                }
+
         :return:
         '''
-        SeqDiagBuilder.projectPath = projectPath
-        SeqDiagBuilder.seqDiagEntryClass = entryClass
-        SeqDiagBuilder.seqDiagEntryMethod = entryMethod
-        SeqDiagBuilder.recordedFlowPath = RecordedFlowPath(SeqDiagBuilder.seqDiagEntryClass, SeqDiagBuilder.seqDiagEntryMethod)
+        SeqDiagBuilder._projectPath = projectPath
+        SeqDiagBuilder._seqDiagEntryClass = entryClass
+        SeqDiagBuilder._seqDiagEntryMethod = entryMethod
+        SeqDiagBuilder.recordedFlowPath = RecordedFlowPath(SeqDiagBuilder._seqDiagEntryClass, SeqDiagBuilder._seqDiagEntryMethod)
         SeqDiagBuilder._isActive = True
         SeqDiagBuilder._participantDocOrderedDic = collections.OrderedDict()
+
+        if classArgDic:
+            SeqDiagBuilder._constructorArgProvider = ConstructorArgsProvider(classArgDic)
 
 
     @staticmethod
@@ -446,13 +489,14 @@ class SeqDiagBuilder:
         build mode to False
         :return:
         '''
-        SeqDiagBuilder.seqDiagEntryClass = None
-        SeqDiagBuilder.seqDiagEntryMethod = None
+        SeqDiagBuilder._seqDiagEntryClass = None
+        SeqDiagBuilder._seqDiagEntryMethod = None
         SeqDiagBuilder.recordedFlowPath = None
         SeqDiagBuilder.seqDiagWarningList = []
         SeqDiagBuilder._isActive = False
         SeqDiagBuilder._recordFlowCalled = False
         SeqDiagBuilder._participantDocOrderedDic = collections.OrderedDict()
+        SeqDiagBuilder._constructorArgProvider = None
 
 
     @staticmethod
@@ -571,7 +615,7 @@ class SeqDiagBuilder:
         :return:                    nothing.
         '''
         seqDiagCommands = SeqDiagBuilder.createSeqDiaqCommands(actorName, maxSigArgNum, maxSigCharLen)
-        targetCommandFileName = SeqDiagBuilder.seqDiagEntryMethod + '.txt'
+        targetCommandFileName = SeqDiagBuilder._seqDiagEntryMethod + '.txt'
         targetDriveDirName = targetDriveDirName.replace('\\','/')
 
         if targetDriveDirName[-1] != '/':
@@ -585,7 +629,7 @@ class SeqDiagBuilder:
         os.chdir(targetDriveDirName)
 
         os.system('java -jar plantuml.jar -tsvg ' + targetCommandFileName)
-        webbrowser.open("file:///{}{}.svg".format(targetDriveDirName, SeqDiagBuilder.seqDiagEntryMethod))
+        webbrowser.open("file:///{}{}.svg".format(targetDriveDirName, SeqDiagBuilder._seqDiagEntryMethod))
 
 
     @staticmethod
@@ -674,10 +718,30 @@ class SeqDiagBuilder:
 
     @staticmethod
     def _issueNoFlowRecordedWarning(isEntryPointReached):
-        SeqDiagBuilder._issueWarning(
-            "No control flow recorded. Method activate() called: {}. Method recordFlow() called: {}. Specified entry point: {}.{} reached: {}".format(
-                SeqDiagBuilder._isActive, SeqDiagBuilder._recordFlowCalled, SeqDiagBuilder.seqDiagEntryClass,
-                SeqDiagBuilder.seqDiagEntryMethod, isEntryPointReached))
+        if SeqDiagBuilder._constructorArgProvider:
+            savedClassArgDic = SeqDiagBuilder._constructorArgProvider.savedClassArgDic
+        else:
+            savedClassArgDic = None
+
+        if SeqDiagBuilder._isActive:
+            warning = "No control flow recorded. Method activate() called with arguments {}, {}, {}, {}: {}. Method recordFlow() called: {}. Specified entry point: {}.{} reached: {}".format(
+                SeqDiagBuilder._projectPath,
+                SeqDiagBuilder._seqDiagEntryClass,
+                SeqDiagBuilder._seqDiagEntryMethod,
+                savedClassArgDic,
+                SeqDiagBuilder._isActive,
+                SeqDiagBuilder._recordFlowCalled,
+                SeqDiagBuilder._seqDiagEntryClass,
+                SeqDiagBuilder._seqDiagEntryMethod,
+                isEntryPointReached)
+        else:
+            warning = "No control flow recorded. Method activate() called: {}. Method recordFlow() called: {}. Specified entry point: {}.{} reached: {}".format(
+                SeqDiagBuilder._isActive,
+                SeqDiagBuilder._recordFlowCalled,
+                SeqDiagBuilder._seqDiagEntryClass,
+                SeqDiagBuilder._seqDiagEntryMethod,
+                isEntryPointReached)
+        SeqDiagBuilder._issueWarning(warning)
 
 
     @staticmethod
@@ -832,7 +896,7 @@ class SeqDiagBuilder:
                         # extracting from the parsed source the name of the classes it contains
                         moduleClassNameList = [node.name for node in ast.walk(parsedSource) if isinstance(node, ast.ClassDef)]
 
-                        if not entryClassEncountered and not SeqDiagBuilder.seqDiagEntryClass in moduleClassNameList:
+                        if not entryClassEncountered and not SeqDiagBuilder._seqDiagEntryClass in moduleClassNameList:
                             # optimization: if the entry class was not yet found and if moduleName
                             # does not contain the definition of the entry class, searching an instance
                             # supporting the entry method in this module does not make sense !
@@ -868,7 +932,7 @@ class SeqDiagBuilder:
         :return:
         '''
         pythonisedPythonClassFilePath = SeqDiagBuilder._pythoniseFilePath(pythonClassFilePath)
-        pythonisedProjectPath = SeqDiagBuilder._pythoniseFilePath(SeqDiagBuilder.projectPath)
+        pythonisedProjectPath = SeqDiagBuilder._pythoniseFilePath(SeqDiagBuilder._projectPath)
         packageSpec = pythonisedPythonClassFilePath.replace(pythonisedProjectPath, '')
 
         #handling file path containg either \\ (windows like) or / (unix like)
@@ -1034,24 +1098,40 @@ class SeqDiagBuilder:
         class_ = getattr(module, className)
         instance = None
         noneStr = ''
+        ctorArgValueList = None
+
+        if SeqDiagBuilder._constructorArgProvider:
+            ctorArgValueList = SeqDiagBuilder._constructorArgProvider.getArgsForClassConstructor(className)
 
         try:
-            instance = eval('class_(' + noneStr + ')')
+            if ctorArgValueList:
+                evaluationString = 'class_('
+                for argValue in ctorArgValueList:
+                    evaluationString += "'" + str(argValue) + "',"
+
+                evaluationString = evaluationString[:-1] + ')'
+                instance = eval(evaluationString)
+            else:
+                instance = eval('class_(' + noneStr + ')')
         except TypeError:
             # here, the clasa we try to instanciate has an __init__ method with one or more
             # arguments. We enter in a loop, trying to instanciate the class adding one argument
             # at each loop run.
             noneStr = 'None'
-            while not instance:
-                try:
-                    instance = eval('class_(' + noneStr + ')')
-                except TypeError:
-                    noneStr += ', None'
-                except SyntaxError as e:
-                    SeqDiagBuilder._issueWarning('ERROR - constructor for class {} in module {} failed due to invalid \
-                    argument(s). To solve the problem, pass a class argument dictionary to the SeqDiagBuilder.activate() method'.format(
-                        className, packageSpec + moduleName))
-                    break
+            if not ctorArgValueList:
+                while not instance:
+                    try:
+                        instance = eval('class_(' + noneStr + ')')
+                    except TypeError:
+                        noneStr += ', None'
+                    except SyntaxError as e:
+                        SeqDiagBuilder._issueWarning('ERROR - constructor for class {} in module {} failed due to invalid argument(s). To solve the problem, pass a class argument dictionary to the SeqDiagBuilder.activate() method'.format(
+                            className, packageSpec + moduleName))
+                        break
+            else:
+                SeqDiagBuilder._issueWarning('ERROR - constructor for class {} in module {} failed due to invalid \
+                argument(s) ({}) defined in the class argument dictionary passed to the SeqDiagBuilder.activate() method'.format(
+                    className, packageSpec + moduleName, ctorArgValueList))
 
         return instance
 

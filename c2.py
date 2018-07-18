@@ -16,6 +16,8 @@ LOCAL_TIME_ZONE = 'Europe/Zurich'
 class Controller:
     '''
     This class is the entry point of the C2 application.
+
+    :seqdiag_note Entry point of the C2 application. When started at the commandline, accepts parameters like RT or simulation mode.
     '''
     DATE_TIME_FORMAT_ARROW = 'YYYY-MM-DD-HH-mm-ss'
     DEFAULT_PRIMARY_FILENAME = 'primary'

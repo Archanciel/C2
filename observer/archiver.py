@@ -3,6 +3,9 @@ from documentation.seqdiagbuilder import SeqDiagBuilder
 import csv
 
 class Archiver(Observer):
+    '''
+    :seqdiag_note Implements the Observer part in the Observable design pattern. Writes either primary or secondary data on disk.
+    '''
     CSV_ROW_HEADER = ["INDEX", "MS TIMESTAMP", "PRICE", "VOLUME"]
 
     '''
@@ -39,7 +42,7 @@ class Archiver(Observer):
         if self.isVerbose:
             print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat))
 
-        SeqDiagBuilder.recordFlow()
+        SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
     def close(self):
         '''

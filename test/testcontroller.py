@@ -131,9 +131,9 @@ class TestController(unittest.TestCase):
         csvPrimaryDataFileName = "primary-one.csv"
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
+        classCtorArgsDic = {'ArchivedDatasource': ['primary-one.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', False]}
 
-
-        SeqDiagBuilder.activate(self.projectPath, 'Controller', 'start')  # activate sequence diagram building
+        SeqDiagBuilder.activate(self.projectPath, 'Controller', 'start', classCtorArgsDic)  # activate sequence diagram building
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
@@ -141,9 +141,9 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
-        commands = SeqDiagBuilder.createSeqDiaqCommands('USER')
+        commands = SeqDiagBuilder.createSeqDiaqCommands('USER', maxSigArgNum=None, maxSigCharLen=30)
 
-        with open("c:\\temp\\ess.txt", "w") as f:
+        with open("c:\\temp\\C2 Simulation mode sequence diagram.txt", "w") as f:
             f.write(commands)
 
         SeqDiagBuilder.deactivate()  # deactivate sequence diagram building

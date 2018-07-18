@@ -6,12 +6,13 @@ class ArchivedDatasource(Observable):
     This class reads in data from a csv trade data archive file and
     notify its Oservers one data line at a time, simulating real time
     data reception from an exchange.
+
+    :seqdiag_note Reads data from a primary data file in simulation mode.
     '''
 
     def __init__(self, filename):
         '''
         Constructor.
-
         :param filename: name of the file to read data from
         '''
         super().__init__()
