@@ -148,6 +148,80 @@ class TestController(unittest.TestCase):
 
         SeqDiagBuilder.deactivate()  # deactivate sequence diagram building
 
+        self.assertEqual(
+'''@startuml
+
+actor USER
+participant Controller
+	note over of Controller
+		Entry point of the C2 application. When
+		started at the commandline, accepts
+		parameters like RT or simulation mode.
+	end note
+participant ArchivedDatasource
+	note over of ArchivedDatasource
+		Reads data from a primary data file in
+		simulation mode.
+	end note
+participant Observable
+	note over of Observable
+		Pivot class in the Observable design pattern.
+	end note
+participant SecondaryDataAggregator
+	note over of SecondaryDataAggregator
+		Implements the Observer part in the
+		Observable design pattern. Calculates the
+		secondary data and sends them one by one to
+		the Criterion.
+	end note
+participant Archiver
+	note over of Archiver
+		Implements the Observer part in the
+		Observable design pattern. Writes either
+		primary or secondary data on disk.
+	end note
+participant PriceVolumeCriterion
+	note over of PriceVolumeCriterion
+		Responsible of computing if an alarm must be
+		raised.
+	end note
+USER -> Controller: start(commandLineArgs=None)
+	activate Controller
+	Controller -> ArchivedDatasource: processArchivedData()
+		activate ArchivedDatasource
+		ArchivedDatasource -> Observable: notifyObservers(data)
+			activate Observable
+			Observable -> SecondaryDataAggregator: update(data)
+				activate SecondaryDataAggregator
+				SecondaryDataAggregator -> SecondaryDataAggregator: aggregateSecondaryData(timestampMilliSec, ...)
+					activate SecondaryDataAggregator
+					note right
+						method to be implemented by Philippe
+					end note
+					SecondaryDataAggregator <-- SecondaryDataAggregator: 
+					deactivate SecondaryDataAggregator
+				SecondaryDataAggregator -> Archiver: update(data)
+					activate Archiver
+					SecondaryDataAggregator <-- Archiver: 
+					deactivate Archiver
+				SecondaryDataAggregator -> PriceVolumeCriterion: check(data)
+					activate PriceVolumeCriterion
+					note right
+						method to be implemented by Philippe
+					end note
+					SecondaryDataAggregator <-- PriceVolumeCriterion: 
+					deactivate PriceVolumeCriterion
+				Observable <-- SecondaryDataAggregator: 
+				deactivate SecondaryDataAggregator
+			ArchivedDatasource <-- Observable: 
+			deactivate Observable
+		Controller <-- ArchivedDatasource: 
+		deactivate ArchivedDatasource
+	USER <-- Controller: 
+	deactivate Controller
+@enduml''', commands)
+
+
     def testStartModeSimulationNoPrimaryFileSpecification(self):
         csvPrimaryDataFileName = "primary.csv"
         csvSecondaryDataFileName = "secondary-2018-06-28-22-41-05.csv"
