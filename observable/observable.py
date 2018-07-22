@@ -2,6 +2,9 @@ from abc import ABCMeta
 from abc import abstractmethod
 
 class Observable(metaclass=ABCMeta):
+    '''
+    :seqdiag_note Pivot class in the Observable design pattern.
+    '''
     def __init__(self):
         self.obs = []
 
@@ -12,7 +15,7 @@ class Observable(metaclass=ABCMeta):
     def deleteObserver(self, observer):
         self.obs.remove(observer)
 
-    def notifyObservers(self, data = None):
+    def notifyObservers(self, data):
         '''
         Each observer has its
         update() called with one argument: the generic 'data'.
