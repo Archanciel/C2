@@ -141,7 +141,7 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
-        commands = SeqDiagBuilder.createSeqDiaqCommands('USER', maxSigArgNum=None, maxSigCharLen=30)
+        commands = SeqDiagBuilder.createSeqDiaqCommands('USER', maxSigArgNum=None, maxSigCharLen=30, maxNoteCharLen=20)
 
         with open("c:\\temp\\C2 Simulation mode sequence diagram.txt", "w") as f:
             f.write(commands)
@@ -153,37 +153,42 @@ class TestController(unittest.TestCase):
 
 actor USER
 participant Controller
-	note over of Controller
-		Entry point of the C2 application. When
-		started at the commandline, accepts
-		parameters like RT or simulation mode.
-	end note
-participant ArchivedDatasource
-	note over of ArchivedDatasource
-		Reads data from a primary data file in
+	/note over of Controller
+		Entry point of the C2
+		application. When started at
+		the commandline, accepts
+		parameters like RT or
 		simulation mode.
 	end note
+participant ArchivedDatasource
+	/note over of ArchivedDatasource
+		Reads data from a primary data
+		file in simulation mode.
+	end note
 participant Observable
-	note over of Observable
-		Pivot class in the Observable design pattern.
+	/note over of Observable
+		Pivot class in the Observable
+		design pattern.
 	end note
 participant SecondaryDataAggregator
-	note over of SecondaryDataAggregator
-		Implements the Observer part in the
-		Observable design pattern. Calculates the
-		secondary data and sends them one by one to
-		the Criterion.
+	/note over of SecondaryDataAggregator
+		Implements the Observer part
+		in the Observable design
+		pattern. Calculates the
+		secondary data and sends them
+		one by one to the Criterion.
 	end note
 participant Archiver
-	note over of Archiver
-		Implements the Observer part in the
-		Observable design pattern. Writes either
-		primary or secondary data on disk.
+	/note over of Archiver
+		Implements the Observer part
+		in the Observable design
+		pattern. Writes either primary
+		or secondary data on disk.
 	end note
 participant PriceVolumeCriterion
-	note over of PriceVolumeCriterion
-		Responsible of computing if an alarm must be
-		raised.
+	/note over of PriceVolumeCriterion
+		Responsible of computing if an
+		alarm must be raised.
 	end note
 USER -> Controller: start(commandLineArgs=None)
 	activate Controller
@@ -196,7 +201,8 @@ USER -> Controller: start(commandLineArgs=None)
 				SecondaryDataAggregator -> SecondaryDataAggregator: aggregateSecondaryData(timestampMilliSec, ...)
 					activate SecondaryDataAggregator
 					note right
-						method to be implemented by Philippe
+						method to be implemented by
+						Philippe
 					end note
 					SecondaryDataAggregator <-- SecondaryDataAggregator: 
 					deactivate SecondaryDataAggregator
@@ -207,7 +213,8 @@ USER -> Controller: start(commandLineArgs=None)
 				SecondaryDataAggregator -> PriceVolumeCriterion: check(data)
 					activate PriceVolumeCriterion
 					note right
-						method to be implemented by Philippe
+						method to be implemented by
+						Philippe
 					end note
 					SecondaryDataAggregator <-- PriceVolumeCriterion: 
 					deactivate PriceVolumeCriterion
