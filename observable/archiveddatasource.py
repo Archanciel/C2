@@ -7,7 +7,7 @@ class ArchivedDatasource(Observable):
     notify its Oservers one data line at a time, simulating real time
     data reception from an exchange.
 
-    :seqdiag_note Reads data from a primary data file in simulation mode.
+    :seqdiag_note In simulation mode, reads data line by line from a primary data file. For every data line read, calls the notifyObservers(data) method of its parent class, Observable.
     '''
 
     def __init__(self, filename):

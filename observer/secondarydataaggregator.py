@@ -7,7 +7,7 @@ class SecondaryDataAggregator(Observer):
     '''
     This class ...
 
-    :seqdiag_note Implements the Observer part in the Observable design pattern. Calculates the secondary data and sends them one by one to the Criterion.
+    :seqdiag_note Implements the Observer part in the Observable design pattern. Each tima its update(data) method is called, it adds this data to the current secondary aggreagated data and sends the secondary data when appropriate to the Criterion calling its check() method.
     '''
     def __init__(self, secondaryDataFilename, isVerbose):
         '''
