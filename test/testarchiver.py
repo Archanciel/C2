@@ -57,8 +57,8 @@ class TestArchiver(unittest.TestCase):
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
             self.assertEqual(Archiver.CSV_ROW_HEADER, next(csvReader))
-            self.assertEqual(['1','1530201849627','6103.0','0.100402'], next(csvReader))
-            self.assertEqual(['2','1530201851230','6103.99','0.03'], next(csvReader))
+            self.assertEqual(['1','1530201849627','6103.0','0.100402', '-1', '-1', '-1'], next(csvReader))
+            self.assertEqual(['2','1530201851230','6103.99','0.03', '-1', '-1', '-1'], next(csvReader))
 
         os.remove(csvFileName)
 

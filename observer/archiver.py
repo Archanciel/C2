@@ -29,17 +29,16 @@ class Archiver(Observer):
         self.recordIndex = 0
 
     def update(self, data):
-        timestampMilliSecCriterion = 0
-        priceFloatCriterion = 0
-        volumeFloatCriterion = \
-            0
-        if len(data) == 4:
+        self.recordIndex += 1
+        timestampMilliSecCriterion = -1
+        priceFloatCriterion = -1
+        volumeFloatCriterion = -1
+        if len(data) == 6:
             # data comming from archive file (mode simulation)
-            self.recordIndex, timestampMilliSec, priceFloat, volumeFloat = data
+            timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion = data
         else:
             # data comming from exchange (mode real time)
-            timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion = data
-            self.recordIndex += 1
+            timestampMilliSec, priceFloat, volumeFloat = data
 
         self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion])
 
