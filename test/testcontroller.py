@@ -14,9 +14,6 @@ from documentation.seqdiagbuilder import SeqDiagBuilder
 
 class TestController(unittest.TestCase):
 
-    def setUp(self):
-        self.projectPath = 'D:\\Development\\Python\\C2'
-
     @unittest.skip
     def testStartModeRealtime(self):
         '''
@@ -82,7 +79,7 @@ class TestController(unittest.TestCase):
         duration = 2
         print("running c2 in real time mode for {} seconds".format(duration))
 
-        SeqDiagBuilder.activate(self.projectPath, 'Controller', 'start')  # activate sequence diagram building
+        SeqDiagBuilder.activate(parentdir, 'Controller', 'start')  # activate sequence diagram building
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         try:
@@ -126,14 +123,13 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
-    @unittest.skip
     def testStartModeSimulationBuildSeqDiag(self):
         csvPrimaryDataFileName = "primary-one.csv"
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
         classCtorArgsDic = {'ArchivedDatasource': ['primary-one.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', False]}
 
-        SeqDiagBuilder.activate(self.projectPath, 'Controller', 'start', classCtorArgsDic)  # activate sequence diagram building
+        SeqDiagBuilder.activate(parentdir, 'Controller', 'start', classCtorArgsDic)  # activate sequence diagram building
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
@@ -190,6 +186,14 @@ participant SecondaryDataAggregator
 		when appropriate to the Criterion
 		calling its check() method.
 	end note
+participant PriceVolumeCriterion
+	/note over of PriceVolumeCriterion
+		Inherits from Criterion. Is
+		responsible for computing if an
+		alarm must be raised. Performs its
+		calculation each time its check()
+		method is called.
+	end note
 participant Archiver
 	/note over of Archiver
 		In simulation mode, this Observer
@@ -198,14 +202,6 @@ participant Archiver
 		Observer) writes the secondary
 		data on disk. In real time mode,
 		saves on disk the primary data.
-	end note
-participant PriceVolumeCriterion
-	/note over of PriceVolumeCriterion
-		Inherits from Criterion. Is
-		responsible for computing if an
-		alarm must be raised. Performs its
-		calculation each time its check()
-		method is called.
 	end note
 USER -> Controller: start(...)
 	activate Controller
@@ -223,10 +219,6 @@ USER -> Controller: start(...)
 					end note
 					SecondaryDataAggregator <-- SecondaryDataAggregator: 
 					deactivate SecondaryDataAggregator
-				SecondaryDataAggregator -> Archiver: update(data)
-					activate Archiver
-					SecondaryDataAggregator <-- Archiver: 
-					deactivate Archiver
 				SecondaryDataAggregator -> PriceVolumeCriterion: check(data)
 					activate PriceVolumeCriterion
 					note right
@@ -235,6 +227,10 @@ USER -> Controller: start(...)
 					end note
 					SecondaryDataAggregator <-- PriceVolumeCriterion: 
 					deactivate PriceVolumeCriterion
+				SecondaryDataAggregator -> Archiver: update(data)
+					activate Archiver
+					SecondaryDataAggregator <-- Archiver: 
+					deactivate Archiver
 				Observable <-- SecondaryDataAggregator: 
 				deactivate SecondaryDataAggregator
 			ArchivedDatasource <-- Observable: 
