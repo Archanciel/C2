@@ -4,7 +4,7 @@ import csv
 
 class Archiver(Observer):
     '''
-    :seqdiag_note Implements the Observer part in the Observable design pattern. Writes either primary or secondary data on disk.
+    :seqdiag_note In simulation mode, this Observer (Archiver, like SecondaryData Aggregator, inherits from Observer) writes the secondary data on disk. In real time mode, saves on disk the primary data.
     '''
     CSV_ROW_HEADER = ["INDEX", "MS TIMESTAMP", "PRICE", "VOLUME"]
 

@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 class Observable(metaclass=ABCMeta):
     '''
-    :seqdiag_note Pivot class in the Observable design pattern.
+    :seqdiag_note Pivot class in the Observable design pattern. Each time its notifyObservers(data) method is called, Observable notifies its subscribed Observers of the received data calling update(data) on each registered Observer.
     '''
     def __init__(self):
         self.obs = []

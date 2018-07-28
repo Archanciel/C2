@@ -141,7 +141,7 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
-        commands = SeqDiagBuilder.createSeqDiaqCommands('USER', maxSigArgNum=None, maxSigCharLen=30)
+        commands = SeqDiagBuilder.createSeqDiaqCommands(actorName='USER', title='C2 simulation mode sequence diagram', maxSigArgNum=None, maxSigCharLen=15, maxNoteCharLen=23)
 
         with open("c:\\temp\\C2 Simulation mode sequence diagram.txt", "w") as f:
             f.write(commands)
@@ -151,41 +151,63 @@ class TestController(unittest.TestCase):
         self.assertEqual(
 '''@startuml
 
+title C2 simulation mode sequence diagram
 actor USER
 participant Controller
-	note over of Controller
-		Entry point of the C2 application. When
-		started at the commandline, accepts
-		parameters like RT or simulation mode.
-	end note
-participant ArchivedDatasource
-	note over of ArchivedDatasource
-		Reads data from a primary data file in
+	/note over of Controller
+		Entry point of the C2 application.
+		When started at the commandline,
+		accepts parameters like RT or
 		simulation mode.
 	end note
+participant ArchivedDatasource
+	/note over of ArchivedDatasource
+		In simulation mode, reads data
+		line by line from a primary data
+		file. For every data line read,
+		calls the notifyObservers(data)
+		method of its parent class,
+		Observable.
+	end note
 participant Observable
-	note over of Observable
-		Pivot class in the Observable design pattern.
+	/note over of Observable
+		Pivot class in the Observable
+		design pattern. Each time its
+		notifyObservers(data) method is
+		called, Observable notifies its
+		subscribed Observers of the
+		received data calling update(data)
+		on each registered Observer.
 	end note
 participant SecondaryDataAggregator
-	note over of SecondaryDataAggregator
-		Implements the Observer part in the
-		Observable design pattern. Calculates the
-		secondary data and sends them one by one to
-		the Criterion.
+	/note over of SecondaryDataAggregator
+		Implements the Observer part in
+		the Observable design pattern.
+		Each tima its update(data) method
+		is called, it adds this data to
+		the current secondary aggreagated
+		data and sends the secondary data
+		when appropriate to the Criterion
+		calling its check() method.
 	end note
 participant Archiver
-	note over of Archiver
-		Implements the Observer part in the
-		Observable design pattern. Writes either
-		primary or secondary data on disk.
+	/note over of Archiver
+		In simulation mode, this Observer
+		(Archiver, like SecondaryData
+		Aggregator, inherits from
+		Observer) writes the secondary
+		data on disk. In real time mode,
+		saves on disk the primary data.
 	end note
 participant PriceVolumeCriterion
-	note over of PriceVolumeCriterion
-		Responsible of computing if an alarm must be
-		raised.
+	/note over of PriceVolumeCriterion
+		Inherits from Criterion. Is
+		responsible for computing if an
+		alarm must be raised. Performs its
+		calculation each time its check()
+		method is called.
 	end note
-USER -> Controller: start(commandLineArgs=None)
+USER -> Controller: start(...)
 	activate Controller
 	Controller -> ArchivedDatasource: processArchivedData()
 		activate ArchivedDatasource
@@ -193,10 +215,11 @@ USER -> Controller: start(commandLineArgs=None)
 			activate Observable
 			Observable -> SecondaryDataAggregator: update(data)
 				activate SecondaryDataAggregator
-				SecondaryDataAggregator -> SecondaryDataAggregator: aggregateSecondaryData(timestampMilliSec, ...)
+				SecondaryDataAggregator -> SecondaryDataAggregator: aggregateSecondaryData(...)
 					activate SecondaryDataAggregator
 					note right
-						method to be implemented by Philippe
+						method to be implemented by
+						Philippe
 					end note
 					SecondaryDataAggregator <-- SecondaryDataAggregator: 
 					deactivate SecondaryDataAggregator
@@ -207,7 +230,8 @@ USER -> Controller: start(commandLineArgs=None)
 				SecondaryDataAggregator -> PriceVolumeCriterion: check(data)
 					activate PriceVolumeCriterion
 					note right
-						method to be implemented by Philippe
+						method to be implemented by
+						Philippe
 					end note
 					SecondaryDataAggregator <-- PriceVolumeCriterion: 
 					deactivate PriceVolumeCriterion
