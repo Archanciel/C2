@@ -7,7 +7,7 @@ from matplotlib import style
 
 style.use('ggplot')
 
-df = pd.read_csv('primary.csv', index_col=0)
+df = pd.read_csv('secondary-2018-07-11-15-32-11.csv', index_col=0)
 #df['100ma'] = df['Close'].rolling(window=100, min_periods=0).mean()
 print(df.head())
 

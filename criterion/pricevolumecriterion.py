@@ -13,6 +13,7 @@ class PriceVolumeCriterion(Criterion):
         '''
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
+        return data
 
 if __name__ == '__main__':
     pass
