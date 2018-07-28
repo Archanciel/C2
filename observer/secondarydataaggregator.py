@@ -38,15 +38,13 @@ class SecondaryDataAggregator(Observer):
         while not secondaryData:
             secondaryData = self.aggregateSecondaryData(timestampMilliSec, priceFloat, volumeFloat)
 
+        #calling the criterion to check if it should raise an alarm
+        criterionData = self.criterion.check(secondaryData)
+
         # sending the secondary data to the archiver so that the sd are written in the
         # sd file to enable viewing them in a price/volume chart. Note that the archiver
         # takes care of implementing the secondary data record index.
-        self.archiver.update(secondaryData)
-
-        #calling the criterion to check if it should raise an alarm
-        self.criterion.check(secondaryData)
-
-
+        self.archiver.update(secondaryData + criterionData)
 
         if self.isVerbose:
             print("SecondaryDataAggregator: {} {} {} {}".format(recordIndex, timestampMilliSec, priceFloat, volumeFloat))

@@ -29,18 +29,22 @@ class Archiver(Observer):
         self.recordIndex = 0
 
     def update(self, data):
+        timestampMilliSecCriterion = 0
+        priceFloatCriterion = 0
+        volumeFloatCriterion = \
+            0
         if len(data) == 4:
             # data comming from archive file (mode simulation)
             self.recordIndex, timestampMilliSec, priceFloat, volumeFloat = data
         else:
             # data comming from exchange (mode real time)
-            timestampMilliSec, priceFloat, volumeFloat = data
+            timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion = data
             self.recordIndex += 1
 
-        self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat])
+        self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion])
 
         if self.isVerbose:
-            print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat))
+            print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion))
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
