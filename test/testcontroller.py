@@ -126,7 +126,7 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
-
+    @unittest.skip
     def testStartModeSimulationBuildSeqDiag(self):
         csvPrimaryDataFileName = "primary-one.csv"
         csvSecondaryDataFileName = "secondary.csv"
@@ -233,6 +233,7 @@ USER -> Controller: start(commandLineArgs=None)
         self.assertEqual(errorMsg, "ERROR - in simulation mode, a primary file name must be provided !")
 
 
+    @unittest.skip
     def testStartModeSimulationPrimaryFileWithNoDateSpecification(self):
         csvPrimaryDataFileName = "../primary.csv"
         csvSecondaryDataFileName = "secondary.csv"
