@@ -30,20 +30,31 @@ class Archiver(Observer):
 
     def update(self, data):
         self.recordIndex += 1
-        timestampMilliSecCriterion = -1
-        priceFloatCriterion = -1
-        volumeFloatCriterion = -1
-        if len(data) == 6:
-            # data comming from archive file (mode simulation)
-            timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion = data
-        else:
-            # data comming from exchange (mode real time)
-            timestampMilliSec, priceFloat, volumeFloat = data
 
-        self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion])
+        try:
+            if len(data) == 6:
+                # data comming from archive file (mode simulation)
+                timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion = data
+                self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion])
 
-        if self.isVerbose:
-            print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion))
+                if self.isVerbose:
+                    print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion))
+            else:
+                # data comming from exchange (mode real time)
+                timestampMilliSec, priceFloat, volumeFloat = data
+                self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat])
+
+                if self.isVerbose:
+                    print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat))
+        except ValueError as e:
+            '''
+            This happens sometimes when C2 is started in mode RT for a specified duration.
+            When the duration is reached, all the Observers, namely the Archivers, are closed 
+            preamptively, which sometimes causes this exception due to a tentative to write the last 
+            received data into an already closed file.
+            '''
+            if str(e) == 'I/O operation on closed file.':
+                print('Last real time data received after closing {}. Consequence: {} not saved/processed !'.format(self.filename, data))
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 

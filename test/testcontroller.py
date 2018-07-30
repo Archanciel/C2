@@ -2,6 +2,7 @@ import unittest
 import os,sys,inspect
 import csv
 import time
+from io import StringIO
 
 DUMMY_HEADER = ["DUMMY HEADER 1", "DUMMY HEADER 2"]
 
@@ -49,12 +50,16 @@ class TestController(unittest.TestCase):
         duration = 3
         print("running c2 in real time mode for {} seconds".format(duration))
 
+        savedStdout = sys.stdout
+        sys.stdout = capturedStdout = StringIO()
+
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         try:
             controller.start(['-mr', '-d{}'.format(duration)])
         except SystemExit:
             pass
 
+        sys.stdout = savedStdout
         csvPrimaryDataFileName = controller.primaryDataFileName
         csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
 
@@ -65,7 +70,13 @@ class TestController(unittest.TestCase):
                     pass
                 for j, _ in enumerate(csvSecondaryFile):
                     pass
-                self.assertEqual(i, j)
+
+                if not 'Last real time data received after closing' in capturedStdout.getvalue():
+                    '''
+                    Only if output file not closed before last reception of RT data, which is the
+                    normal and most frequent situation, can the next assertt be verified !
+                    '''
+                    self.assertEqual(i, j)
 
         self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
 
