@@ -64,19 +64,11 @@ class TestController(unittest.TestCase):
         csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
-            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
-                i, j = 0, 0
-                for i, _ in enumerate(csvPrimaryFile):
-                    pass
-                for j, _ in enumerate(csvSecondaryFile):
-                    pass
-
-                if not 'Last real time data received after closing' in capturedStdout.getvalue():
-                    '''
-                    Only if output file not closed before last reception of RT data, which is the
-                    normal and most frequent situation, can the next assertt be verified !
-                    '''
-                    self.assertEqual(i, j)
+            header = csvPrimaryFile.readline()
+            self.assertEqual(header, 'INDEX,MS TIMESTAMP,PRICE,VOLUME\n')
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            header = csvSecondaryFile.readline()
+            self.assertEqual(header, 'INDEX,TRADES,MS TIMESTAMP,PRICE,VOLUME\n')
 
         self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
 
@@ -125,12 +117,13 @@ class TestController(unittest.TestCase):
         self.assertTrue(os.path.isfile(csvSecondaryDataFileName))
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
             with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
-                i, j = 0, 0
-                for i, _ in enumerate(csvPrimaryFile):
+                primaryRecordsNumber, secondaryRecordsNumber = 0, 0
+                for primaryRecordsNumber, _ in enumerate(csvPrimaryFile):
                     pass
-                for j, _ in enumerate(csvSecondaryFile):
+                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
                     pass
-                self.assertEqual(i, j)
+                self.assertEqual(primaryRecordsNumber, 12)
+                self.assertEqual(secondaryRecordsNumber, 7)
 
         os.remove(csvSecondaryDataFileName)
 
@@ -138,7 +131,7 @@ class TestController(unittest.TestCase):
         csvPrimaryDataFileName = "primary-one.csv"
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
-        classCtorArgsDic = {'ArchivedDatasource': ['primary-one.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', False]}
+        classCtorArgsDic = {'ArchivedDatasource': ['primary-one.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
 
         SeqDiagBuilder.activate(parentdir, 'Controller', 'start', classCtorArgsDic)  # activate sequence diagram building
 

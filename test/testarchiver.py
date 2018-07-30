@@ -15,12 +15,12 @@ class TestArchiver(unittest.TestCase):
 
     def testInitCloseCycle(self):
         csvFileName = "test.csv"
-        archiver = Archiver(csvFileName, isVerbose=False)
+        archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.CSV_ROW_HEADER, next(csvReader))
+            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
 
         os.remove(csvFileName)
 
@@ -38,26 +38,26 @@ class TestArchiver(unittest.TestCase):
             self.assertEqual(DUMMY_HEADER, next(csvReader))
 
         #now, instanciating the Archiver and checking the csv file was overwritten
-        archiver = Archiver(csvFileName, isVerbose=False)
+        archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.CSV_ROW_HEADER, next(csvReader))
+            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
 
         os.remove(csvFileName)
 
 
     def testUpdateRealTime(self):
         csvFileName = "test.csv"
-        archiver = Archiver(csvFileName, isVerbose=False)
+        archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
         archiver.update((1530201849627,6103.0,0.100402))
         archiver.update((1530201851230,6103.99,0.03))
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.CSV_ROW_HEADER, next(csvReader))
+            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
             self.assertEqual(['1','1530201849627','6103.0','0.100402'], next(csvReader))
             self.assertEqual(['2','1530201851230','6103.99','0.03'], next(csvReader))
 
@@ -74,7 +74,7 @@ class TestArchiver(unittest.TestCase):
         :return:
         '''
         csvFileName = "test.csv"
-        archiver = Archiver(csvFileName, isVerbose=False)
+        archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
         archiver.update((1530201849627,6103.0,0.100402))
         archiver.update((1530201851230,6103.99,0.03))
         archiver.close()
@@ -85,7 +85,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.CSV_ROW_HEADER, next(csvReader))
+            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
             self.assertEqual(['1','1530201849627','6103.0','0.100402'], next(csvReader))
             self.assertEqual(['2','1530201851230','6103.99','0.03'], next(csvReader))
 
@@ -96,16 +96,16 @@ class TestArchiver(unittest.TestCase):
 
     def testUpdateSimulation(self):
         csvFileName = "test.csv"
-        archiver = Archiver(csvFileName, isVerbose=False)
-        archiver.update((1530201849627,6103.0,0.100402,-1,-1,-1))
-        archiver.update((1530201851230,6103.99,0.03,-1,-1,-1))
+        archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
+        archiver.update((1530201849627,6103.0,0.100402))
+        archiver.update((1530201851230,6103.99,0.03))
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.CSV_ROW_HEADER, next(csvReader))
-            self.assertEqual(['1','1530201849627','6103.0','0.100402','-1','-1','-1'], next(csvReader))
-            self.assertEqual(['2','1530201851230','6103.99','0.03','-1','-1','-1'], next(csvReader))
+            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
+            self.assertEqual(['1','1530201849627','6103.0','0.100402'], next(csvReader))
+            self.assertEqual(['2','1530201851230','6103.99','0.03'], next(csvReader))
 
         os.remove(csvFileName)
 

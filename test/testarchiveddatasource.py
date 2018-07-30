@@ -23,12 +23,13 @@ class TestArchivedDatasource(unittest.TestCase):
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
             with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
-                i, j = 0, 0
-                for i, _ in enumerate(csvPrimaryFile):
+                primaryRecordsNumber, secondaryRecordsNumber = 0, 0
+                for primaryRecordsNumber, _ in enumerate(csvPrimaryFile):
                     pass
-                for j, _ in enumerate(csvSecondaryFile):
+                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
                     pass
-                self.assertEqual(i, j)
+                self.assertEqual(primaryRecordsNumber, 5)
+                self.assertEqual(secondaryRecordsNumber, 4)
 
         os.remove(csvSecondaryDataFileName)
 

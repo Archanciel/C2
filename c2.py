@@ -107,7 +107,7 @@ class Controller:
 
             #adding an Archiver to store on disk the primary data
             self.primaryDataFileName = self.buildPrimaryFileName(primaryFileName, dateTimeStr)
-            self.datasource.addObserver(Archiver(self.primaryDataFileName, isVerbose))
+            self.datasource.addObserver(Archiver(self.primaryDataFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose))
 
             #adding a Notifyer to compute the secondary data, store them on disk and send
             #them to the Criterion

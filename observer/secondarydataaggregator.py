@@ -18,39 +18,55 @@ class SecondaryDataAggregator(Observer):
         '''
 
         #creating the output csv file and initializing it with the column titles
-        self.archiver = Archiver(secondaryDataFilename, isVerbose=False)
+        self.archiver = Archiver(secondaryDataFilename, Archiver.SECONDARY_DATA_CSV_ROW_HEADER, isVerbose=False)
         self.isVerbose = isVerbose
         self.criterion = PriceVolumeCriterion()
 
+        self.isOneSecondIntervalReached = False
+
+        self.lastSecBeginTimestamp = 0
+        self.lastSecVolume = 0
+        self.lastSecAvgPrice = 0
+        self.lastSecTradeNumber = 0
 
     def update(self, data):
         recordIndex = ''
 
         if len(data) == 4:
             # data comming from archive file (mode simulation)
-            recordIndex, timestampMilliSec, priceFloat, volumeFloat = data
+            recordIndexStr, timestampMilliSecStr, priceFloatStr, volumeFloatStr = data
         else:
             # data comming from exchange (mode real time)
-            timestampMilliSec, priceFloat, volumeFloat = data
+            timestampMilliSecStr, priceFloatStr, volumeFloatStr = data
 
-        secondaryData = False
+        timestampMilliSec = int(timestampMilliSecStr)
+        priceFloat = float(priceFloatStr)
+        volumeFloat = float(volumeFloatStr)
+        sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat = self.aggregateSecondaryData(
+            timestampMilliSec, priceFloat, volumeFloat)
 
-        while not secondaryData:
-            secondaryData = self.aggregateSecondaryData(timestampMilliSec, priceFloat, volumeFloat)
+        # calling the criterion to check if it should raise an alarm
+        criterionData = self.criterion.check(data)
 
-        #calling the criterion to check if it should raise an alarm
-        criterionData = self.criterion.check(secondaryData)
+        if self.lastSecBeginTimestamp == 0:
+            self.lastSecBeginTimestamp = timestampMilliSec
 
-        # sending the secondary data to the archiver so that the sd are written in the
-        # sd file to enable viewing them in a price/volume chart. Note that the archiver
-        # takes care of implementing the secondary data record index.
-        self.archiver.update(secondaryData + criterionData)
+        if self.isOneSecondIntervalReached and sdTimestamp > 0:
+            # sending the secondary data to the archiver so that the sd are written in the
+            # sd file to enable viewing them in a price/volume chart. Note that the archiver
+            # takes care of implementing the secondary data record index.
+#            self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat) + criterionData)
+            self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat))
 
-        if self.isVerbose:
-            print("SecondaryDataAggregator: {} {} {} {}".format(recordIndex, timestampMilliSec, priceFloat, volumeFloat))
+            print("\t{0}\t{1}\t\t{2:.7f}\t{3:.2f}".format(sdTimestamp, sdTradesNumber, sdVolumeFloat,
+                                                               sdPricefloat))
+            self.lastSecBeginTimestamp += 1000
+            self.isOneSecondIntervalReached = False
+            self.lastSecTradeNumber = 0
+            self.lastSecVolume = 0
+            self.lastSecAvgPrice = 0
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
-
 
     def aggregateSecondaryData(self, timestampMilliSec, priceFloat, volumeFloat):
         '''
@@ -69,8 +85,16 @@ class SecondaryDataAggregator(Observer):
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
-        return timestampMilliSec, priceFloat, volumeFloat # temporally returning silly value !
+        self.lastSecTradeNumber += 1
+        self.lastSecVolume += volumeFloat
+        self.lastSecAvgPrice += priceFloat * volumeFloat
 
+        if timestampMilliSec >= self.lastSecBeginTimestamp:
+            self.isOneSecondIntervalReached = True
+
+            return self.lastSecBeginTimestamp, self.lastSecTradeNumber, self.lastSecVolume, self.lastSecAvgPrice / self.lastSecVolume
+        else:
+            return None, None, None, None
 
     def close(self):
         '''

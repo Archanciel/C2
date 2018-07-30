@@ -4,14 +4,15 @@ import csv
 
 class Archiver(Observer):
     '''
+    This class stores the received data into a csv file.
+
     :seqdiag_note In simulation mode, this Observer (Archiver, like SecondaryData Aggregator, inherits from Observer) writes the secondary data on disk. In real time mode, saves on disk the primary data.
     '''
-    CSV_ROW_HEADER = ["INDEX", "MS TIMESTAMP", "PRICE", "VOLUME"]
 
-    '''
-    This class stores the received data into a csv file.
-    '''
-    def __init__(self, filename, isVerbose):
+    PRIMARY_DATA_CSV_ROW_HEADER = ["INDEX", "MS TIMESTAMP", "PRICE", "VOLUME"]
+    SECONDARY_DATA_CSV_ROW_HEADER = ["INDEX", "TRADES", "MS TIMESTAMP", "PRICE", "VOLUME"]
+
+    def __init__(self, filename, csvFileHeader, isVerbose):
         '''
         Constructs an instance of Archiver which will write into the passed
         file name. In case the file already exists, it will be overwritten.
@@ -24,21 +25,23 @@ class Archiver(Observer):
         self.filename = filename
         self.file = open(self.filename, 'w', newline = '')
         self.writer = csv.writer(self.file)
-        self.writer.writerow(self.CSV_ROW_HEADER)
+        self.writer.writerow(csvFileHeader)
         self.isVerbose = isVerbose
         self.recordIndex = 0
 
     def update(self, data):
+        SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
+
         self.recordIndex += 1
 
         try:
-            if len(data) == 6:
+            if len(data) == 4:
                 # data comming from archive file (mode simulation)
-                timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion = data
-                self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion])
+                timestampMilliSec, numberOfTrades, priceFloat, volumeFloat = data
+                self.writer.writerow([self.recordIndex, numberOfTrades, timestampMilliSec, priceFloat, volumeFloat])
 
                 if self.isVerbose:
-                    print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat, timestampMilliSecCriterion, priceFloatCriterion, volumeFloatCriterion))
+                    print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat))
             else:
                 # data comming from exchange (mode real time)
                 timestampMilliSec, priceFloat, volumeFloat = data
@@ -55,8 +58,8 @@ class Archiver(Observer):
             '''
             if str(e) == 'I/O operation on closed file.':
                 print('Last real time data received after closing {}. Consequence: {} not saved/processed !'.format(self.filename, data))
-
-        SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
+            else:
+                raise e
 
     def close(self):
         '''
