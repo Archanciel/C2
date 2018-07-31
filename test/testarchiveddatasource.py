@@ -28,8 +28,8 @@ class TestArchivedDatasource(unittest.TestCase):
                     pass
                 for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
                     pass
-                self.assertEqual(primaryRecordsNumber, 5)
-                self.assertEqual(secondaryRecordsNumber, 4)
+                self.assertEqual(primaryRecordsNumber, 25)
+                self.assertEqual(secondaryRecordsNumber, 12)
 
         os.remove(csvSecondaryDataFileName)
 
@@ -50,8 +50,8 @@ class TestArchivedDatasource(unittest.TestCase):
         archivedDatasource.addObserver(tstObserver)
         archivedDatasource.processArchivedData()
 
-        self.assertEqual(tstObserver.receivedDataList[0], ('1','1530201849627', '6103.0', '0.100402'))
-        self.assertEqual(tstObserver.receivedDataList[1], ('2','1530201851230', '6103.99', '0.03'))
+        self.assertEqual(tstObserver.receivedDataList[0], ('1', '1533063366209', '0.008764', '7735.00'))
+        self.assertEqual(tstObserver.receivedDataList[1], ('2', '1533063367343', '0.000017', '7734.99'))
 
 if __name__ == '__main__':
     unittest.main()

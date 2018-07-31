@@ -61,10 +61,10 @@ class TestController(unittest.TestCase):
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
             header = csvPrimaryFile.readline()
-            self.assertEqual(header, 'INDEX,MS TIMESTAMP,PRICE,VOLUME\n')
+            self.assertEqual(header, 'IDX	TIMESTAMP (MS)	VOLUME     	PRICE\n')
         with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
             header = csvSecondaryFile.readline()
-            self.assertEqual(header, 'INDEX,TRADES,MS TIMESTAMP,PRICE,VOLUME\n')
+            self.assertEqual(header, 'IDX	TRD\tTIMESTAMP (MS)	VOLUME     	PRICE\n')
 
         self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
 
@@ -102,8 +102,8 @@ class TestController(unittest.TestCase):
 
 
     def testStartModeSimulation(self):
-        csvPrimaryDataFileName = "primary-2018-06-28-22-41-05.csv"
-        csvSecondaryDataFileName = "secondary-2018-06-28-22-41-05.csv"
+        csvPrimaryDataFileName = "primary-2018-07-31-20-56-05.csv"
+        csvSecondaryDataFileName = "secondary-2018-07-31-20-56-05.csv"
         controller = Controller()
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
@@ -118,16 +118,16 @@ class TestController(unittest.TestCase):
                     pass
                 for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
                     pass
-                self.assertEqual(primaryRecordsNumber, 12)
-                self.assertEqual(secondaryRecordsNumber, 7)
+                self.assertEqual(primaryRecordsNumber, 25)
+                self.assertEqual(secondaryRecordsNumber, 12)
 
         os.remove(csvSecondaryDataFileName)
 
     def testStartModeSimulationBuildSeqDiag(self):
-        csvPrimaryDataFileName = "primary-one.csv"
+        csvPrimaryDataFileName = "primary-two.csv"
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
-        classCtorArgsDic = {'ArchivedDatasource': ['primary-one.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
+        classCtorArgsDic = {'ArchivedDatasource': ['primary-one.csv'], 'SecondaryDataAggregator': ['secondary.csv', False, True], 'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
 
         SeqDiagBuilder.activate(parentdir, 'Controller', 'start', classCtorArgsDic)  # activate sequence diagram building
 

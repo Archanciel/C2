@@ -9,8 +9,8 @@ class Archiver(Observer):
     :seqdiag_note In simulation mode, this Observer (Archiver, like SecondaryData Aggregator, inherits from Observer) writes the secondary data on disk. In real time mode, saves on disk the primary data.
     '''
 
-    PRIMARY_DATA_CSV_ROW_HEADER = ["INDEX", "MS TIMESTAMP", "PRICE", "VOLUME"]
-    SECONDARY_DATA_CSV_ROW_HEADER = ["INDEX", "TRADES", "MS TIMESTAMP", "PRICE", "VOLUME"]
+    PRIMARY_DATA_CSV_ROW_HEADER = ["IDX", "TIMESTAMP (MS)", "VOLUME     ", "PRICE"]
+    SECONDARY_DATA_CSV_ROW_HEADER = ["IDX", "TRD", "TIMESTAMP (MS)", "VOLUME     ", "PRICE"]
 
     def __init__(self, filename, csvFileHeader, isVerbose):
         '''
@@ -24,7 +24,7 @@ class Archiver(Observer):
         #creating the output csv file and initializing it with the column titles
         self.filename = filename
         self.file = open(self.filename, 'w', newline = '')
-        self.writer = csv.writer(self.file)
+        self.writer = csv.writer(self.file, delimiter = '\t')
         self.writer.writerow(csvFileHeader)
         self.isVerbose = isVerbose
         self.recordIndex = 0
@@ -37,15 +37,15 @@ class Archiver(Observer):
         try:
             if len(data) == 4:
                 # data comming from archive file (mode simulation)
-                timestampMilliSec, numberOfTrades, priceFloat, volumeFloat = data
-                self.writer.writerow([self.recordIndex, numberOfTrades, timestampMilliSec, priceFloat, volumeFloat])
+                timestampMilliSec, numberOfTrades, volumeFloat, priceFloat = data
+                self.writer.writerow([self.recordIndex, numberOfTrades, timestampMilliSec, "{:.6f}".format(volumeFloat), "{:.2f}".format(priceFloat)])
 
                 if self.isVerbose:
                     print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat))
             else:
                 # data comming from exchange (mode real time)
-                timestampMilliSec, priceFloat, volumeFloat = data
-                self.writer.writerow([self.recordIndex, timestampMilliSec, priceFloat, volumeFloat])
+                timestampMilliSec, volumeFloat, priceFloat = data
+                self.writer.writerow([self.recordIndex, timestampMilliSec, "{:.6f}".format(volumeFloat), "{:.2f}".format(priceFloat)])
 
                 if self.isVerbose:
                     print("{} {} {} {}".format(self.recordIndex, timestampMilliSec, priceFloat, volumeFloat))

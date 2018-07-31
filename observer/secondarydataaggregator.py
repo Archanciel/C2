@@ -42,10 +42,10 @@ class SecondaryDataAggregator(Observer):
 
         if len(data) == 4:
             # data comming from archive file (mode simulation)
-            recordIndexStr, timestampMilliSecStr, priceFloatStr, volumeFloatStr = data
+            recordIndexStr, timestampMilliSecStr, volumeFloatStr, priceFloatStr = data
         else:
             # data comming from exchange (mode real time)
-            timestampMilliSecStr, priceFloatStr, volumeFloatStr = data
+            timestampMilliSecStr, volumeFloatStr, priceFloatStr = data
 
         timestampMilliSec = int(timestampMilliSecStr)
         priceFloat = float(priceFloatStr)
@@ -68,7 +68,7 @@ class SecondaryDataAggregator(Observer):
 
             if not self.doNotPrintOutput:
                 timeHHMMSS = datetime.fromtimestamp(sdTimestamp / 1000).strftime('%H:%M:%S')
-                print("{0}\t{1}\t{2:.7f}\t{3:.2f}".format(timeHHMMSS, sdTradesNumber, sdVolumeFloat,
+                print("{0}\t{1}\t{2:.6f}\t{3:.2f}".format(timeHHMMSS, sdTradesNumber, sdVolumeFloat,
                                                                sdPricefloat))
             self.lastSecBeginTimestamp += 1000
             self.isOneSecondIntervalReached = False

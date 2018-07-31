@@ -20,7 +20,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
 
         os.remove(csvFileName)
 
@@ -43,7 +43,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
 
         os.remove(csvFileName)
 
@@ -51,15 +51,15 @@ class TestArchiver(unittest.TestCase):
     def testUpdateRealTime(self):
         csvFileName = "test.csv"
         archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
-        archiver.update((1530201849627,6103.0,0.100402))
-        archiver.update((1530201851230,6103.99,0.03))
+        archiver.update((1530201849627,0.100402,6103.0))
+        archiver.update((1530201851230,0.03,6103.99))
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
-            self.assertEqual(['1','1530201849627','6103.0','0.100402'], next(csvReader))
-            self.assertEqual(['2','1530201851230','6103.99','0.03'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['1\t1530201849627\t0.100402\t6103.00'], next(csvReader))
+            self.assertEqual(['2\t1530201851230\t0.030000\t6103.99'], next(csvReader))
 
         os.remove(csvFileName)
 
@@ -75,8 +75,8 @@ class TestArchiver(unittest.TestCase):
         '''
         csvFileName = "test.csv"
         archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
-        archiver.update((1530201849627,6103.0,0.100402))
-        archiver.update((1530201851230,6103.99,0.03))
+        archiver.update((1530201849627,0.100402,6103.0))
+        archiver.update((1530201851230,0.03,6103.99))
         archiver.close()
         savedStdout = sys.stdout
         sys.stdout = capturedStdout = StringIO()
@@ -85,9 +85,9 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
-            self.assertEqual(['1','1530201849627','6103.0','0.100402'], next(csvReader))
-            self.assertEqual(['2','1530201851230','6103.99','0.03'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['1\t1530201849627\t0.100402\t6103.00'], next(csvReader))
+            self.assertEqual(['2\t1530201851230\t0.030000\t6103.99'], next(csvReader))
 
         os.remove(csvFileName)
 
@@ -97,15 +97,15 @@ class TestArchiver(unittest.TestCase):
     def testUpdateSimulation(self):
         csvFileName = "test.csv"
         archiver = Archiver(csvFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose=False)
-        archiver.update((1530201849627,6103.0,0.100402))
-        archiver.update((1530201851230,6103.99,0.03))
+        archiver.update((1530201849627,0.100402,6103.0))
+        archiver.update((1530201851230,0.03,6103.99))
         archiver.close()
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(Archiver.PRIMARY_DATA_CSV_ROW_HEADER, next(csvReader))
-            self.assertEqual(['1','1530201849627','6103.0','0.100402'], next(csvReader))
-            self.assertEqual(['2','1530201851230','6103.99','0.03'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['1\t1530201849627\t0.100402\t6103.00'], next(csvReader))
+            self.assertEqual(['2\t1530201851230\t0.030000\t6103.99'], next(csvReader))
 
         os.remove(csvFileName)
 

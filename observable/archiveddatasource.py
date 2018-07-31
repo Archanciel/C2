@@ -17,7 +17,7 @@ class ArchivedDatasource(Observable):
         '''
         super().__init__()
         self.file = open(filename, 'r')
-        self.reader = csv.reader(self.file)
+        self.reader = csv.reader(self.file, delimiter='\t')
         next(self.reader) #read the header line
 
 
@@ -25,10 +25,10 @@ class ArchivedDatasource(Observable):
         for row in self.reader:
             recordIndex = row[0]
             timestampMilliSec = row[1]
-            priceFloat = row[2]
-            volumeFloat = row[3]
+            volumeFloat = row[2]
+            priceFloat = row[3]
 
-            self.notifyObservers((recordIndex, timestampMilliSec, priceFloat, volumeFloat))
+            self.notifyObservers((recordIndex, timestampMilliSec, volumeFloat, priceFloat))
 
         self.file.close()
         super().stopObservable()

@@ -107,4 +107,4 @@ class BinanceDatasource(Observable):
         priceFloat = float(priceStr)
         volumeFloat = float(volumeStr)
 
-        return timestampMilliSec, priceFloat, volumeFloat
+        return timestampMilliSec, volumeFloat, priceFloat
