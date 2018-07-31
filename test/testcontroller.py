@@ -127,7 +127,7 @@ class TestController(unittest.TestCase):
         csvPrimaryDataFileName = "primary-two.csv"
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
-        classCtorArgsDic = {'ArchivedDatasource': ['primary-one.csv'], 'SecondaryDataAggregator': ['secondary.csv', False, True], 'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
+        classCtorArgsDic = {'ArchivedDatasource': ['primary-two.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
 
         SeqDiagBuilder.activate(parentdir, 'Controller', 'start', classCtorArgsDic)  # activate sequence diagram building
 

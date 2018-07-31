@@ -10,7 +10,7 @@ class SecondaryDataAggregator(Observer):
 
     :seqdiag_note Implements the Observer part in the Observable design pattern. Each tima its update(data) method is called, it adds this data to the current secondary aggreagated data and sends the secondary data when appropriate to the Criterion calling its check() method.
     '''
-    def __init__(self, secondaryDataFilename, doNotPrintOutput=False, isVerbose=False, isModeSimulation = False):
+    def __init__(self, secondaryDataFilename, doNotPrintOutput=False, isVerbose=False):
         '''
         Constructs an instance of Notifyer which computes the secndary data.
 
@@ -30,13 +30,7 @@ class SecondaryDataAggregator(Observer):
 
         self.isOneSecondIntervalReached = False
 
-        if isModeSimulation:
-            self.lastSecBeginTimestamp = 0
-        else:
-            now = datetime.now()
-            nowAtSecond = now.replace(microsecond=0)
-            self.lastSecBeginTimestamp = nowAtSecond.timestamp() * 1000
-
+        self.lastSecBeginTimestamp = 0
         self.lastSecVolume = 0
         self.lastSecAvgPrice = 0
         self.lastSecTradeNumber = 0
@@ -63,7 +57,16 @@ class SecondaryDataAggregator(Observer):
         criterionData = self.criterion.check(data)
 
         if self.lastSecBeginTimestamp == 0:
-            self.lastSecBeginTimestamp = timestampMilliSec
+            timestampSec = datetime.fromtimestamp(timestampMilliSec / 1000)
+#            print('timestampMilliSec {} {}'.format(timestampMilliSec, timestampSec.strftime('%H:%M:%S')))
+#            print('timestampSec {} {}'.format(timestampSec.timestamp(), timestampSec.strftime('%H:%M:%S')))
+            timestampSecTrimmedFromMillisec = timestampSec.replace(microsecond=0)
+#            print('timestampSecTrimmedFromMillisec {} {}'.format(timestampSecTrimmedFromMillisec.timestamp(), timestampSecTrimmedFromMillisec.strftime('%H:%M:%S')))
+            timestampSecTrimmedFromMillisecInMillisec = int(timestampSecTrimmedFromMillisec.timestamp() * 1000)
+#            print('timestampSecTrimmedFromMillisecInMillisec {}'.format(timestampSecTrimmedFromMillisecInMillisec))
+            self.lastSecBeginTimestamp = timestampSecTrimmedFromMillisecInMillisec
+
+            #self.lastSecBeginTimestamp = timestampMilliSec
 
         if self.isOneSecondIntervalReached and sdTimestamp > 0:
             # sending the secondary data to the archiver so that the sd are written in the

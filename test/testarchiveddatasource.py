@@ -18,7 +18,7 @@ class TestArchivedDatasource(unittest.TestCase):
         csvPrimaryDataFileName = "../primary.csv"
         csvSecondaryDataFileName = "secondary.csv"
         archivedDatasource = ArchivedDatasource(csvPrimaryDataFileName)
-        archivedDatasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose=False, isModeSimulation=True))
+        archivedDatasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose=False))
         archivedDatasource.processArchivedData()
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
