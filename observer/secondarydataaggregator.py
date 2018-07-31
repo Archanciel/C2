@@ -10,7 +10,7 @@ class SecondaryDataAggregator(Observer):
 
     :seqdiag_note Implements the Observer part in the Observable design pattern. Each tima its update(data) method is called, it adds this data to the current secondary aggreagated data and sends the secondary data when appropriate to the Criterion calling its check() method.
     '''
-    def __init__(self, secondaryDataFilename, doNotPrintOutput=False, isVerbose=False):
+    def __init__(self, secondaryDataFilename, doNotPrintOutput=False, isVerbose=False, isModeSimulation = False):
         '''
         Constructs an instance of Notifyer which computes the secndary data.
 
@@ -30,7 +30,13 @@ class SecondaryDataAggregator(Observer):
 
         self.isOneSecondIntervalReached = False
 
-        self.lastSecBeginTimestamp = 0
+        if isModeSimulation:
+            self.lastSecBeginTimestamp = 0
+        else:
+            now = datetime.now()
+            nowAtSecond = now.replace(microsecond=0)
+            self.lastSecBeginTimestamp = nowAtSecond.timestamp() * 1000
+
         self.lastSecVolume = 0
         self.lastSecAvgPrice = 0
         self.lastSecTradeNumber = 0

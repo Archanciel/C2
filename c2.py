@@ -167,7 +167,7 @@ class Controller:
             print('Starting C2 in simulation mode on primary data file {}.'.format(
                 primaryFileName))
 
-            self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose))
+            self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose, isModeSimulation=True))
             self.datasource.processArchivedData()
 
     def getDurationSeconds(self, durationStr):
