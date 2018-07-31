@@ -87,7 +87,7 @@ class ThreadedTimeCounter(Thread):
         else:
             active = self.countDown()
 
-        timeStr = '\r{} {:02d} {:02d}:{:02d}:{:02d}\t'.format(self.modeString, self.day, self.hour, self.minute, self.second)
+        timeStr = '\r{} {:02d} {:02d}:{:02d}:{:02d}'.format(self.modeString, self.day, self.hour, self.minute, self.second)
 #        print(timeStr, end='')
         sys.stdout.write(timeStr)
         sys.stdout.flush()

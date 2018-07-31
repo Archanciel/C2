@@ -2,6 +2,7 @@ from observer.observer import Observer
 from observer.archiver import Archiver
 from criterion.pricevolumecriterion import PriceVolumeCriterion
 from documentation.seqdiagbuilder import SeqDiagBuilder
+from datetime import datetime
 
 class SecondaryDataAggregator(Observer):
     '''
@@ -9,16 +10,21 @@ class SecondaryDataAggregator(Observer):
 
     :seqdiag_note Implements the Observer part in the Observable design pattern. Each tima its update(data) method is called, it adds this data to the current secondary aggreagated data and sends the secondary data when appropriate to the Criterion calling its check() method.
     '''
-    def __init__(self, secondaryDataFilename, isVerbose):
+    def __init__(self, secondaryDataFilename, doNotPrintOutput=False, isVerbose=False):
         '''
         Constructs an instance of Notifyer which computes the secndary data.
 
         :param filename: name of the file to write in.
+        :param doNotPrintOutput: used to indicate that the computed secondary data must not be printed
+               in the console. Used when C2 is started in RT mode with a duration specified. In this
+               case, a count down string is output in the console and this would interfere with
+               the output of secondary data.
         :param isVerbose: if True, outputs received data in console
         '''
 
         #creating the output csv file and initializing it with the column titles
         self.archiver = Archiver(secondaryDataFilename, Archiver.SECONDARY_DATA_CSV_ROW_HEADER, isVerbose=False)
+        self.doNotPrintOutput = doNotPrintOutput
         self.isVerbose = isVerbose
         self.criterion = PriceVolumeCriterion()
 
@@ -28,6 +34,8 @@ class SecondaryDataAggregator(Observer):
         self.lastSecVolume = 0
         self.lastSecAvgPrice = 0
         self.lastSecTradeNumber = 0
+
+        print('Time\t\tTrades\tVolume\t\tPrice')
 
     def update(self, data):
         recordIndex = ''
@@ -58,7 +66,9 @@ class SecondaryDataAggregator(Observer):
 #            self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat) + criterionData)
             self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat))
 
-            print("\t{0}\t{1}\t\t{2:.7f}\t{3:.2f}".format(sdTimestamp, sdTradesNumber, sdVolumeFloat,
+            if not self.doNotPrintOutput:
+                timeHHMMSS = datetime.fromtimestamp(sdTimestamp / 1000).strftime('%H:%M:%S')
+                print("{0}\t{1}\t{2:.7f}\t{3:.2f}".format(timeHHMMSS, sdTradesNumber, sdVolumeFloat,
                                                                sdPricefloat))
             self.lastSecBeginTimestamp += 1000
             self.isOneSecondIntervalReached = False

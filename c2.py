@@ -113,7 +113,7 @@ class Controller:
             #them to the Criterion
             csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
             #forcing isVerbose to False to avoid interfering with Archiver verbosity !
-            self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose=False))
+            self.datasource.addObserver(SecondaryDataAggregator(secondaryDataFilename=csvSecondaryDataFileName, doNotPrintOutput=durationStr != None, isVerbose=False))
 
             try:
                 self.datasource.startDataReception()
