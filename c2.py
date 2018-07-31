@@ -115,7 +115,13 @@ class Controller:
             #forcing isVerbose to False to avoid interfering with Archiver verbosity !
             self.datasource.addObserver(SecondaryDataAggregator(csvSecondaryDataFileName, isVerbose=False))
 
-            self.datasource.startDataReception()
+            try:
+                self.datasource.startDataReception()
+            except Exception as e:
+                print('\nERROR - Connection with RT datasource could not be established.\n')
+                self.stop()
+                sys.exit(1)
+
             counter = None
 
             if durationStr:

@@ -3,6 +3,7 @@ from binance.websockets import BinanceSocketManager
 from binance.client import Client
 import pickle
 from twisted.internet import reactor
+from twisted.internet.error import ReactorNotRunning
 
 from apikey.apikeyfilegenerator import ApiKeyFileGenerator
 
@@ -62,10 +63,16 @@ class BinanceDatasource(Observable):
 
         :return:
         '''
-        self.socketManager.stop_socket(self.connectionKey)
+        if self.socketManager: # self.socketManager == None if connection could not be established
+            self.socketManager.stop_socket(self.connectionKey)
 
         # required for the program to exit
-        reactor.stop()
+        try:
+            reactor.stop()
+        except ReactorNotRunning:
+            # the case if connection could not be established
+            pass
+
         super().stopObservable()
 
 

@@ -50,16 +50,12 @@ class TestController(unittest.TestCase):
         duration = 3
         print("running c2 in real time mode for {} seconds".format(duration))
 
-        savedStdout = sys.stdout
-        sys.stdout = capturedStdout = StringIO()
-
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         try:
             controller.start(['-mr', '-d{}'.format(duration)])
         except SystemExit:
             pass
 
-        sys.stdout = savedStdout
         csvPrimaryDataFileName = controller.primaryDataFileName
         csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
 
