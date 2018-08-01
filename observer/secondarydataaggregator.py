@@ -57,14 +57,8 @@ class SecondaryDataAggregator(Observer):
         criterionData = self.criterion.check(data)
 
         if self.lastSecBeginTimestamp == 0:
-            timestampSec = datetime.fromtimestamp(timestampMilliSec / 1000)
-#            print('timestampMilliSec {} {}'.format(timestampMilliSec, timestampSec.strftime('%H:%M:%S')))
-#            print('timestampSec {} {}'.format(timestampSec.timestamp(), timestampSec.strftime('%H:%M:%S')))
-            timestampSecTrimmedFromMillisec = timestampSec.replace(microsecond=0)
-#            print('timestampSecTrimmedFromMillisec {} {}'.format(timestampSecTrimmedFromMillisec.timestamp(), timestampSecTrimmedFromMillisec.strftime('%H:%M:%S')))
-            timestampSecTrimmedFromMillisecInMillisec = int(timestampSecTrimmedFromMillisec.timestamp() * 1000)
-#            print('timestampSecTrimmedFromMillisecInMillisec {}'.format(timestampSecTrimmedFromMillisecInMillisec))
-            self.lastSecBeginTimestamp = timestampSecTrimmedFromMillisecInMillisec
+            startTimestamp = self.calculateStartTimestamp(timestampMilliSec)
+            self.lastSecBeginTimestamp = startTimestamp
 
             #self.lastSecBeginTimestamp = timestampMilliSec
 
@@ -86,6 +80,16 @@ class SecondaryDataAggregator(Observer):
             self.lastSecAvgPrice = 0
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
+
+    def calculateStartTimestamp(self, timestampMilliSec):
+        '''
+
+        :param timestampMilliSec:
+        :return:
+        '''
+        roundedTimestampMilliSec = int(timestampMilliSec / 1000) * 1000
+
+        return roundedTimestampMilliSec + 1000
 
     def aggregateSecondaryData(self, timestampMilliSec, priceFloat, volumeFloat):
         '''
