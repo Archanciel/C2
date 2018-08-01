@@ -15,7 +15,6 @@ from documentation.seqdiagbuilder import SeqDiagBuilder
 
 class TestController(unittest.TestCase):
 
-    @unittest.skip
     def testStartModeRealtime(self):
         '''
         this causes testStartModeRealtimeWithDurationInSeconds to fail !!!
@@ -31,13 +30,11 @@ class TestController(unittest.TestCase):
         csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
-            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
-                i, j = 0, 0
-                for i, _ in enumerate(csvPrimaryFile):
-                    pass
-                for j, _ in enumerate(csvSecondaryFile):
-                    pass
-                self.assertEqual(i, j)
+            header = csvPrimaryFile.readline()
+            self.assertEqual(header, 'IDX	TIMESTAMP (MS)	VOLUME     	PRICE\n')
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            header = csvSecondaryFile.readline()
+            self.assertEqual(header, 'IDX	TRD\tTIMESTAMP (MS)	VOLUME     	PRICE\n')
 
         self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
 
