@@ -274,6 +274,138 @@ USER -> Controller: start(...)
 	deactivate Controller
 @enduml''', commands)
 
+    @unittest.skip
+    def testStartModeRTBuildSeqDiag(self):
+        controller = Controller()
+        classCtorArgsDic = {'ArchivedDatasource': ['primary-two.csv'],
+                            'SecondaryDataAggregator': ['secondary.csv', False],
+                            'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
+
+        # SeqDiagBuilder.activate(parentdir, 'Controller', 'start',
+        #                         classCtorArgsDic)  # activate sequence diagram building
+
+        duration = 3
+
+        # IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        try:
+            controller.start(['-mr', '-d{}'.format(duration)])
+        except SystemExit:
+            pass
+
+        while not controller.wasStopped():
+            print('controller still working')
+
+        csvPrimaryDataFileName = controller.primaryDataFileName
+        csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
+
+        commands = SeqDiagBuilder.createSeqDiaqCommands(actorName='USER',
+                                                        title='C2 simulation mode sequence diagram',
+                                                        maxSigArgNum=None, maxSigCharLen=15, maxNoteCharLen=23)
+
+        with open("c:\\temp\\C2 RT mode sequence diagram.txt", "w") as f:
+            f.write(commands)
+
+        SeqDiagBuilder.deactivate()  # deactivate sequence diagram building
+
+        os.remove(csvPrimaryDataFileName)
+        os.remove(csvSecondaryDataFileName)
+
+        self.assertEqual(
+'''@startuml
+
+title C2 simulation mode sequence diagram
+actor USER
+participant Controller
+    /note over of Controller
+        Entry point of the C2 application.
+        When started at the commandline,
+        accepts parameters like RT or
+        simulation mode.
+    end note
+participant ArchivedDatasource
+    /note over of ArchivedDatasource
+        In simulation mode, reads data
+        line by line from a primary data
+        file. For every data line read,
+        calls the notifyObservers(data)
+        method of its parent class,
+        Observable.
+    end note
+participant Observable
+    /note over of Observable
+        Pivot class in the Observable
+        design pattern. Each time its
+        notifyObservers(data) method is
+        called, Observable notifies its
+        subscribed Observers of the
+        received data calling update(data)
+        on each registered Observer.
+    end note
+participant SecondaryDataAggregator
+    /note over of SecondaryDataAggregator
+        Implements the Observer part in
+        the Observable design pattern.
+        Each tima its update(data) method
+        is called, it adds this data to
+        the current secondary aggreagated
+        data and sends the secondary data
+        when appropriate to the Criterion
+        calling its check() method.
+    end note
+participant PriceVolumeCriterion
+    /note over of PriceVolumeCriterion
+        Inherits from Criterion. Is
+        responsible for computing if an
+        alarm must be raised. Performs its
+        calculation each time its check()
+        method is called.
+    end note
+participant Archiver
+    /note over of Archiver
+        In simulation mode, this Observer
+        (Archiver, like SecondaryData
+        Aggregator, inherits from
+        Observer) writes the secondary
+        data on disk. In real time mode,
+        saves on disk the primary data.
+    end note
+USER -> Controller: start(...)
+    activate Controller
+    Controller -> ArchivedDatasource: processArchivedData()
+        activate ArchivedDatasource
+        ArchivedDatasource -> Observable: notifyObservers(data)
+            activate Observable
+            Observable -> SecondaryDataAggregator: update(data)
+                activate SecondaryDataAggregator
+                SecondaryDataAggregator -> SecondaryDataAggregator: aggregateSecondaryData(...)
+                    activate SecondaryDataAggregator
+                    note right
+                        method to be implemented by
+                        Philippe
+                    end note
+                    SecondaryDataAggregator <-- SecondaryDataAggregator: 
+                    deactivate SecondaryDataAggregator
+                SecondaryDataAggregator -> PriceVolumeCriterion: check(data)
+                    activate PriceVolumeCriterion
+                    note right
+                        method to be implemented by
+                        Philippe
+                    end note
+                    SecondaryDataAggregator <-- PriceVolumeCriterion: 
+                    deactivate PriceVolumeCriterion
+                SecondaryDataAggregator -> Archiver: update(data)
+                    activate Archiver
+                    SecondaryDataAggregator <-- Archiver: 
+                    deactivate Archiver
+                Observable <-- SecondaryDataAggregator: 
+                deactivate SecondaryDataAggregator
+            ArchivedDatasource <-- Observable: 
+            deactivate Observable
+        Controller <-- ArchivedDatasource: 
+        deactivate ArchivedDatasource
+    USER <-- Controller: 
+    deactivate Controller
+@enduml''', commands)
 
     def testStartModeSimulationNoPrimaryFileSpecification(self):
         csvPrimaryDataFileName = "primary.csv"
