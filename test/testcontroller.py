@@ -72,6 +72,42 @@ class TestController(unittest.TestCase):
         os.remove(csvSecondaryDataFileName)
 
 
+    def testStartModeRTFolowedBySimulation(self):
+        '''
+        Start C2 in RT for 3 seconds. Then launch C2 in simulation mode on the generated primary
+        file and ensure the secondary data generated at the RT and simulation steps are identical.
+        :return:
+        '''
+        controller = Controller()
+        duration = 3
+        print("running c2 in real time mode for {} seconds".format(duration))
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        try:
+            controller.start(['-mr', '-d{}'.format(duration)])
+        except SystemExit:
+            pass
+
+        csvPrimaryDataFileName = controller.primaryDataFileName
+        csvSecondaryDataFileName = controller.buildSecondaryFileNameFromPrimaryFileName(csvPrimaryDataFileName, "secondary")
+
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            sdFromRT = csvSecondaryFile.readlines()
+
+        self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
+
+        controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
+        controller.stop()
+
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            sdFromSimulation = csvSecondaryFile.readlines()
+
+        self.assertEqual(sdFromRT, sdFromSimulation)
+
+        os.remove(csvPrimaryDataFileName)
+        os.remove(csvSecondaryDataFileName)
+
+
     @unittest.skip
     def testStartModeRealtimeWithDurationInSecondsBuildSeqDiag(self):
         controller = Controller()

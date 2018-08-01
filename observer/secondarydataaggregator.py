@@ -62,7 +62,7 @@ class SecondaryDataAggregator(Observer):
 
             #self.lastSecBeginTimestamp = timestampMilliSec
 
-        if self.isOneSecondIntervalReached and sdTimestamp > 0:
+        if self.isOneSecondIntervalReached and sdTimestamp:
             # sending the secondary data to the archiver so that the sd are written in the
             # sd file to enable viewing them in a price/volume chart. Note that the archiver
             # takes care of implementing the secondary data record index.
