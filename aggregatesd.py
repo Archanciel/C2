@@ -1,7 +1,7 @@
 import csv
 import os
 from decimal import *
-import collections    
+from datetime import datetime
 
 class SecondaryDataAggregator():
     def __init__(self, secondaryDataFilename, isVerbose):
@@ -53,10 +53,11 @@ class SecondaryDataAggregator():
         #self.archiver.update(secondaryData + criterionData)
  
         if self.lastSecBeginTimestamp == 0:
-            self.lastSecBeginTimestamp = timestampMilliSec
+            self.lastSecBeginTimestamp = int(timestampMilliSec / 1000) * 1000
       
         if self.isOneSecondIntervalReached and self.secondaryDataIndex > 0:
-            print("{0}\t{1}\t{2}\t{3:.7f}\t{4:.2f}".format(sdIndex, sdTimestamp, sdTradeNumber, sdVolumeFloat, sdPricefloat))
+            sdTimestampHHMMSS = datetime.fromtimestamp(sdTimestamp / 1000).strftime("%H:%M:%S")
+            print("{0}\t{1}\t{2}\t{3:.7f}\t{4:.2f}".format(sdIndex, sdTimestampHHMMSS, sdTradeNumber, sdVolumeFloat, sdPricefloat))
             self.lastSecBeginTimestamp += 1000
             self.isOneSecondIntervalReached = False
             self.lastSecTradeNumber = 0
@@ -100,7 +101,6 @@ next(sd_reader) #read the header line
 
 secDataAggregator = SecondaryDataAggregator(None,True)
 
-#print('Index\tTime\t\tVolume\t\tPrice')
 print('Idx\tTime\t\tTrades\tVolume\t\tPrice')
 
 for data in sd_reader:
