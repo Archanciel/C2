@@ -34,10 +34,10 @@ class SecondaryDataAggregator():
  
         if len(data) == 4:
             # data comming from archive file (mode simulation)
-            recordIndexStr, timestampMilliSecStr, priceFloatStr, volumeFloatStr = data
+            recordIndexStr, timestampMilliSecStr, volumeFloatStr, priceFloatStr = data
         else:
             # data comming from exchange (mode real time)
-            timestampMilliSecStr, priceFloatStr, volumeFloatStr = data
+            timestampMilliSecStr, volumeFloatStr, priceFloatStr = data
         
         timestampMilliSec = int(timestampMilliSecStr)
         priceFloat = float(priceFloatStr)
@@ -56,7 +56,7 @@ class SecondaryDataAggregator():
             self.lastSecBeginTimestamp = timestampMilliSec
       
         if self.isOneSecondIntervalReached and self.secondaryDataIndex > 0:
-            print("\t{0}\t{1}\t{2}\t\t{3:.7f}\t{4:.2f}".format(sdIndex, sdTimestamp, sdTradeNumber, sdVolumeFloat, sdPricefloat))
+            print("{0}\t{1}\t{2}\t{3:.7f}\t{4:.2f}".format(sdIndex, sdTimestamp, sdTradeNumber, sdVolumeFloat, sdPricefloat))
             self.lastSecBeginTimestamp += 1000
             self.isOneSecondIntervalReached = False
             self.lastSecTradeNumber = 0
@@ -90,17 +90,18 @@ class SecondaryDataAggregator():
             
             return self.secondaryDataIndex, self.lastSecBeginTimestamp, self.lastSecTradeNumber, self.lastSecVolume, self.lastSecAvgPrice / self.lastSecVolume
         else:
-            return None, None, None, None, None
+            return 0, None, None, None, None
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-primaryFileName = "primary-2018-07-30-19-26-52.csv"
+primaryFileName = "primary.csv"
 sd_file = open(dir_path + "/" + primaryFileName, 'r')
-sd_reader = csv.reader(sd_file)
+sd_reader = csv.reader(sd_file, delimiter='\t')
 next(sd_reader) #read the header line
 
 secDataAggregator = SecondaryDataAggregator(None,True)
 
-print('Index\tTimestamp\t\tTrades\tVolume\t\tPrice')
+#print('Index\tTime\t\tVolume\t\tPrice')
+print('Idx\tTime\t\tTrades\tVolume\t\tPrice')
 
 for data in sd_reader:
     secDataAggregator.update(data)
