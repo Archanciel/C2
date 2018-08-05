@@ -2,6 +2,7 @@ import pickle
 import argparse
 import base64
 import sys
+import os
 
 
 class ApiKeyFileGenerator:
