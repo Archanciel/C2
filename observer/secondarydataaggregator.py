@@ -59,6 +59,9 @@ class SecondaryDataAggregator(Observer):
         if self.lastSecBeginTimestamp == 0:
             startTimestamp = self.calculateStartTimestamp(timestampMilliSec)
             self.lastSecBeginTimestamp = startTimestamp
+            self.lastSecTradeNumber = 0
+            self.lastSecVolume = 0
+            self.lastSecAvgPrice = 0
 
             #self.lastSecBeginTimestamp = timestampMilliSec
 
@@ -71,7 +74,7 @@ class SecondaryDataAggregator(Observer):
 
             if not self.doNotPrintOutput:
                 timeHHMMSS = datetime.fromtimestamp(sdTimestamp / 1000).strftime('%H:%M:%S')
-                print("{0}\t{1}\t{2:.6f}\t{3:.2f}".format(timeHHMMSS, sdTradesNumber, sdVolumeFloat,
+                print("{0}\t{1}\t\t{2:.6f}\t{3:.2f}".format(timeHHMMSS, sdTradesNumber, sdVolumeFloat,
                                                                sdPricefloat))
             self.lastSecBeginTimestamp += 1000
             self.isOneSecondIntervalReached = False

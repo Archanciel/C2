@@ -156,6 +156,28 @@ class TestController(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
+    def testSecDataGenerationInSimulationMode(self):
+        csvPrimaryDataFileName = "primary-four.csv"
+        csvSecondaryDataFileName = "secondary.csv"
+        controller = Controller()
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
+        controller.stop()
+
+        self.assertTrue(os.path.isfile(csvSecondaryDataFileName))
+        with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
+            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+                primaryRecordsNumber, secondaryRecordsNumber = 0, 0
+                for primaryRecordsNumber, _ in enumerate(csvPrimaryFile):
+                    pass
+                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
+                    pass
+                self.assertEqual(primaryRecordsNumber, 25)
+                self.assertEqual(secondaryRecordsNumber, 11)
+
+        os.remove(csvSecondaryDataFileName)
+
     def testStartModeSimulationBuildSeqDiag(self):
         if os.name == 'posix':
             # running on Android
