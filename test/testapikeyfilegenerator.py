@@ -22,7 +22,7 @@ class TestApiKeyFileGenerator(unittest.TestCase):
         ap = ApiKeyFileGenerator()
         ap.createKeyFile(['-a', 'key', '-s', 'secret key', '-f', 'testfile', '-pw', 'monpw'])
 
-        with open(ApiKeyFileGenerator.FILE_PATH + 'testfile.bin', 'rb') as handle:
+        with open(ap.FILE_PATH + 'testfile.bin', 'rb') as handle:
             encryptedKeyList = pickle.load(handle)
 
         self.assertEqual(['w5jDlMOn', 'w6DDlMORw6LDnMOhwo_DmcOVw7A='], encryptedKeyList)

@@ -37,12 +37,12 @@ class BinanceDatasource(Observable):
         :return:
         '''
 
+        apiKeyMgr = ApiKeyFileGenerator()
+
         # obtain from file the binance encoded API keys. This file was created using
         # ApiKeyFileGenerator.
-        with open(ApiKeyFileGenerator.FILE_PATH + 'bi.bin', 'rb') as handle:
+        with open(apiKeyMgr.FILE_PATH + 'bi.bin', 'rb') as handle:
             encryptedKeyList = pickle.load(handle)
-
-        apiKeyMgr = ApiKeyFileGenerator()
 
         # decode the keys with the pw used to encode them
         api_key = apiKeyMgr.decode(self.DECODE_PW, encryptedKeyList[0])

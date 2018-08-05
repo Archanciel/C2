@@ -5,8 +5,11 @@ import sys
 
 
 class ApiKeyFileGenerator:
-    # FILE_PATH = "sdcard/"
-    FILE_PATH = "D:/development/python/"  # if executed on Windows
+    def __init__(self):
+        if os.name == 'posix':
+            self.FILE_PATH = "/sdcard/"  # if executed on Android
+        else:
+            self.FILE_PATH = "D:/development/python/"  # if executed on Windows
 
     def getCommandLineArgs(self, argList):
         '''

@@ -157,6 +157,10 @@ class TestController(unittest.TestCase):
         os.remove(csvSecondaryDataFileName)
 
     def testStartModeSimulationBuildSeqDiag(self):
+        if os.name == 'posix':
+            # running on Android
+            return
+
         csvPrimaryDataFileName = "primary-two.csv"
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()

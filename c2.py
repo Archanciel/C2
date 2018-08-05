@@ -1,7 +1,7 @@
 import sys
 import argparse
 import arrow
-import msvcrt   # only ok on Windows !
+import os
 
 from observable.binancedatasource import BinanceDatasource
 from observable.archiveddatasource import ArchivedDatasource
@@ -138,13 +138,15 @@ class Controller:
                     counter.start()
 
                 while not self.stopped:
-                    if msvcrt.kbhit():
-                        if counter:
-                            counter.stop()
-                            print('\nStopping the stream ...')
-                        else:
-                            print('Stopping the stream ...')
-                        c2.stop()
+                    if not os.name == 'posix':
+                        import msvcrt  # only ok on Windows !
+                        if msvcrt.kbhit():
+                            if counter:
+                                counter.stop()
+                                print('\nStopping the stream ...')
+                            else:
+                                print('Stopping the stream ...')
+                            self.stop()
 
                 sys.exit(0)  # required for the program to exit !
         else:
