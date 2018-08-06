@@ -47,28 +47,21 @@ class SecondaryDataAggregator(Observer):
             # data comming from exchange (mode real time)
             timestampMilliSecStr, volumeFloatStr, priceFloatStr = data
 
+        timestampMilliSec = int(timestampMilliSecStr)
+
         if self.lastSecBeginTimestamp == 0:
             startTimestamp = self.calculateStartTimestamp(timestampMilliSec)
             self.lastSecBeginTimestamp = startTimestamp
             self.lastSecTradeNumber = 0
             self.lastSecVolume = 0
             self.lastSecAvgPrice = 0
-
-```
-
-            #self.lastSecBeginTimestamp = timestampMilliSec
         else:
-
-            timestampMilliSec = int(timestampMilliSecStr)
             priceFloat = float(priceFloatStr)
             volumeFloat = float(volumeFloatStr)
-            sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat = self.aggregateSecondaryData(
-            timestampMilliSec, priceFloat, volumeFloat)
+            sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat = self.aggregateSecondaryData(timestampMilliSec, priceFloat, volumeFloat)
 
             # calling the criterion to check if it should raise an alarm
             criterionData = self.criterion.check(data)
-
-```
 
         if self.isOneSecondIntervalReached and sdTimestamp:
             # sending the secondary data to the archiver so that the sd are written in the
@@ -99,8 +92,7 @@ class SecondaryDataAggregator(Observer):
 
         return roundedTimestampMilliSec + 1000
 
-    def aggregateSecondaryData(self, timestampM
-illiSec, priceFloat, volumeFloat):
+    def aggregateSecondaryData(self, timestampMilliSec, priceFloat, volumeFloat):
         '''
         This method is called each time primary data are received. It aggregates the passed
         primary data and returns None if the aggregation interval (typically 1 second9 is not
