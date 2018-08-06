@@ -157,8 +157,9 @@ class TestController(unittest.TestCase):
         os.remove(csvSecondaryDataFileName)
 
     def testSecDataGenerationInSimulationMode(self):
-        csvPrimaryDataFileName = "primary-four.csv"
+        csvPrimaryDataFileName = "primary-five.csv"
         csvSecondaryDataFileName = "secondary.csv"
+        csvExpectedSecondaryDataFileName = "expected-secondary-five.csv"
         controller = Controller()
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
@@ -166,15 +167,11 @@ class TestController(unittest.TestCase):
         controller.stop()
 
         self.assertTrue(os.path.isfile(csvSecondaryDataFileName))
-        with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
-            with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
-                primaryRecordsNumber, secondaryRecordsNumber = 0, 0
-                for primaryRecordsNumber, _ in enumerate(csvPrimaryFile):
-                    pass
-                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
-                    pass
-                self.assertEqual(primaryRecordsNumber, 25)
-                self.assertEqual(secondaryRecordsNumber, 11)
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
+                for secondaryFileLine in csvSecondaryFile:
+                    expectedSecondaryFileLine = csvExpectedSecondaryFile.readline()
+                    self.assertEqual(secondaryFileLine, expectedSecondaryFileLine)
 
         os.remove(csvSecondaryDataFileName)
 
