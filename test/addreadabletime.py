@@ -44,5 +44,5 @@ class AddReadableTime():
         self.outputFile.close()
 
 if __name__ == '__main__':
-    art = AddReadableTime('primary-four.csv')
+    art = AddReadableTime(input('Enter source csv file name: '))
     art.convert()
