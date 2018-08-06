@@ -21,7 +21,7 @@ class AddReadableTime():
         self.reader = csv.reader(self.inputFile, delimiter='\t')
         next(self.reader) #read the header line
 
-        self.outputFile = open(curDir + filename + '_r.csv', 'w')
+        self.outputFile = open(curDir + filename + '_r.csv', 'w', newline = '')
         self.writer = csv.writer(self.outputFile, delimiter = '\t')
         self.writer.writerow(SECONDARY_DATA_CSV_ROW_HEADER)
         self.recordIndex = 0
