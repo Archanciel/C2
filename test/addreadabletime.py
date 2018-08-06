@@ -21,7 +21,7 @@ class AddReadableTime():
         self.reader = csv.reader(self.inputFile, delimiter='\t')
         next(self.reader) #read the header line
 
-        self.outputFile = open(curDir + filename + '_r', 'w')
+        self.outputFile = open(curDir + filename + '_r.csv', 'w')
         self.writer = csv.writer(self.outputFile, delimiter = '\t')
         self.writer.writerow(SECONDARY_DATA_CSV_ROW_HEADER)
         self.recordIndex = 0
@@ -37,7 +37,7 @@ class AddReadableTime():
             timestampMilliSec = row[1]
             volumeFloat = float(row[2])
             priceFloat = float(row[3])
-            readableTime = datetime.fromtimestamp(int(timestampMilliSec) / 1000).strftime("%H:%M:%S.%s")
+            readableTime = datetime.fromtimestamp(int(timestampMilliSec) / 1000).strftime("%H:%M:%S.%f")
             self.writer.writerow([self.recordIndex, timestampMilliSec, readableTime, "{:.6f}".format(volumeFloat), "{:.2f}".format(priceFloat)])
 
         self.inputFile.close()
