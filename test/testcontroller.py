@@ -173,6 +173,15 @@ class TestController(unittest.TestCase):
                     expectedSecondaryFileLine = csvExpectedSecondaryFile.readline()
                     self.assertEqual(secondaryFileLine, expectedSecondaryFileLine)
 
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
+                secondaryRecordsNumber, expectedSecondaryRecordsNumber = 0, 0
+                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
+                    pass
+                for expectedSecondaryRecordsNumber, _ in enumerate(csvExpectedSecondaryFile):
+                    pass
+                self.assertEqual(secondaryRecordsNumber, expectedSecondaryRecordsNumber)
+
         os.remove(csvSecondaryDataFileName)
 
     def testStartModeSimulationBuildSeqDiag(self):

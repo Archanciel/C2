@@ -31,8 +31,9 @@ class SecondaryDataAggregator(Observer):
         self.isOneSecondIntervalReached = False
 
         self.lastSecBeginTimestamp = 0
+        self.lastSecEndTimestamp = 0
         self.lastSecVolume = 0
-        self.lastSecAvgPrice = 0
+        self.lastSecPriceVolumeTotal = 0
         self.lastSecTradeNumber = 0
 
         print('Time\t\tTrades\tVolume\t\tPrice')
@@ -52,9 +53,10 @@ class SecondaryDataAggregator(Observer):
         if self.lastSecBeginTimestamp == 0:
             startTimestamp = self.calculateStartTimestamp(timestampMilliSec)
             self.lastSecBeginTimestamp = startTimestamp
+            self.lastSecEndTimestamp = startTimestamp + 1000
             self.lastSecTradeNumber = 0
             self.lastSecVolume = 0
-            self.lastSecAvgPrice = 0
+            self.lastSecPriceVolumeTotal = 0
         else:
             priceFloat = float(priceFloatStr)
             volumeFloat = float(volumeFloatStr)
@@ -63,7 +65,7 @@ class SecondaryDataAggregator(Observer):
             # calling the criterion to check if it should raise an alarm
             criterionData = self.criterion.check(data)
 
-        if self.isOneSecondIntervalReached and sdTimestamp:
+        if self.isOneSecondIntervalReached:
             # sending the secondary data to the archiver so that the sd are written in the
             # sd file to enable viewing them in a price/volume chart. Note that the archiver
             # takes care of implementing the secondary data record index.
@@ -74,11 +76,21 @@ class SecondaryDataAggregator(Observer):
                 timeHHMMSS = datetime.fromtimestamp(sdTimestamp / 1000).strftime('%H:%M:%S')
                 print("{0}\t{1}\t\t{2:.6f}\t{3:.2f}".format(timeHHMMSS, sdTradesNumber, sdVolumeFloat,
                                                                sdPricefloat))
-            self.lastSecBeginTimestamp += 1000
+
+            while timestampMilliSec >= self.lastSecEndTimestamp:
+                sdTimestamp = self.lastSecEndTimestamp
+                sdTradesNumber = 0
+                sdVolumeFloat = 0
+                sdPricefloat = self.lastSecPriceVolumeTotal / self.lastSecVolume
+                self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat))
+                if not self.doNotPrintOutput:
+                    timeHHMMSS = datetime.fromtimestamp(sdTimestamp / 1000).strftime('%H:%M:%S')
+                    print("{0}\t{1}\t\t{2:.6f}\t{3:.2f}".format(timeHHMMSS, sdTradesNumber, sdVolumeFloat,
+                                                                   sdPricefloat))
+                self.lastSecBeginTimestamp += 1000
+                self.lastSecEndTimestamp += 1000
+
             self.isOneSecondIntervalReached = False
-            self.lastSecTradeNumber = 0
-            self.lastSecVolume = 0
-            self.lastSecAvgPrice = 0
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
@@ -109,17 +121,47 @@ class SecondaryDataAggregator(Observer):
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
-        self.lastSecTradeNumber += 1
-        self.lastSecVolume += volumeFloat
-        self.lastSecAvgPrice += priceFloat * volumeFloat
+        if timestampMilliSec >= self.lastSecBeginTimestamp and timestampMilliSec < self.lastSecEndTimestamp:
+            self.lastSecTradeNumber += 1
+            self.lastSecVolume += volumeFloat
+            self.lastSecPriceVolumeTotal += priceFloat * volumeFloat
 
-        if timestampMilliSec >= self.lastSecBeginTimestamp:
-            self.isOneSecondIntervalReached = True
-
-            return self.lastSecBeginTimestamp, self.lastSecTradeNumber, self.lastSecVolume, self.lastSecAvgPrice / self.lastSecVolume
-        else:
             return None, None, None, None
+        elif timestampMilliSec >= self.lastSecEndTimestamp:
+            if timestampMilliSec < self.lastSecEndTimestamp + 1000:
+                lastSecBeginTimestamp = self.lastSecBeginTimestamp
+                lastSecTradeNumber = self.lastSecTradeNumber
+                lastSecVolume = self.lastSecVolume
+                lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
 
+                self.lastSecTradeNumber = 1
+                self.lastSecVolume = volumeFloat
+                self.lastSecPriceVolumeTotal = priceFloat * volumeFloat
+                self.lastSecBeginTimestamp += 1000
+                self.lastSecEndTimestamp += 1000
+                self.isOneSecondIntervalReached = True
+
+                return lastSecBeginTimestamp, lastSecTradeNumber, lastSecVolume, lastSecAvgPrice
+            else:
+                lastSecBeginTimestamp = self.lastSecBeginTimestamp
+                lastSecTradeNumber = self.lastSecTradeNumber
+                lastSecVolume = self.lastSecVolume
+                lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
+                self.isOneSecondIntervalReached = True
+
+                return lastSecBeginTimestamp, lastSecTradeNumber, lastSecVolume, lastSecAvgPrice
+            # else:
+            #     lastSecBeginTimestamp = self.lastSecBeginTimestamp
+            #     lastSecTradeNumber = 0
+            #     lastSecVolume = 0
+            #     lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
+            #
+            #     self.lastSecTradeNumber = 1
+            #     self.lastSecVolume = volumeFloat
+            #     self.lastSecPriceVolumeTotal = priceFloat * volumeFloat
+            #     self.isOneSecondIntervalReached = True
+            #
+            #     return lastSecBeginTimestamp, lastSecTradeNumber, lastSecVolume, lastSecAvgPrice
     def close(self):
         '''
         Called when the observed object is
