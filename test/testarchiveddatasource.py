@@ -29,7 +29,7 @@ class TestArchivedDatasource(unittest.TestCase):
                 for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
                     pass
                 self.assertEqual(primaryRecordsNumber, 25)
-                self.assertEqual(secondaryRecordsNumber, 11)
+                self.assertEqual(secondaryRecordsNumber, 12)
 
         os.remove(csvSecondaryDataFileName)
 

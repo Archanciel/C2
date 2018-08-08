@@ -152,35 +152,7 @@ class TestController(unittest.TestCase):
                 for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
                     pass
                 self.assertEqual(primaryRecordsNumber, 25)
-                self.assertEqual(secondaryRecordsNumber, 11)
-
-        os.remove(csvSecondaryDataFileName)
-
-    def testSecDataGenerationInSimulationMode(self):
-        csvPrimaryDataFileName = "primary-five.csv"
-        csvSecondaryDataFileName = "secondary.csv"
-        csvExpectedSecondaryDataFileName = "expected-secondary-five.csv"
-        controller = Controller()
-
-        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
-        controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
-        controller.stop()
-
-        self.assertTrue(os.path.isfile(csvSecondaryDataFileName))
-        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
-            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
-                for secondaryFileLine in csvSecondaryFile:
-                    expectedSecondaryFileLine = csvExpectedSecondaryFile.readline()
-                    self.assertEqual(secondaryFileLine, expectedSecondaryFileLine)
-
-        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
-            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
-                secondaryRecordsNumber, expectedSecondaryRecordsNumber = 0, 0
-                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
-                    pass
-                for expectedSecondaryRecordsNumber, _ in enumerate(csvExpectedSecondaryFile):
-                    pass
-                self.assertEqual(secondaryRecordsNumber, expectedSecondaryRecordsNumber)
+                self.assertEqual(secondaryRecordsNumber, 12)
 
         os.remove(csvSecondaryDataFileName)
 
@@ -198,7 +170,6 @@ class TestController(unittest.TestCase):
 
         #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
         controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
-        controller.stop()
 
         os.remove(csvSecondaryDataFileName)
 
@@ -292,10 +263,14 @@ USER -> Controller: start(...)
 					end note
 					SecondaryDataAggregator <-- PriceVolumeCriterion: 
 					deactivate PriceVolumeCriterion
-				SecondaryDataAggregator -> Archiver: update(data)
-					activate Archiver
-					SecondaryDataAggregator <-- Archiver: 
-					deactivate Archiver
+				SecondaryDataAggregator -> SecondaryDataAggregator: storeAndPrintSecondaryData(...)
+					activate SecondaryDataAggregator
+					SecondaryDataAggregator -> Archiver: update(data)
+						activate Archiver
+						SecondaryDataAggregator <-- Archiver: 
+						deactivate Archiver
+					SecondaryDataAggregator <-- SecondaryDataAggregator: 
+					deactivate SecondaryDataAggregator
 				Observable <-- SecondaryDataAggregator: 
 				deactivate SecondaryDataAggregator
 			ArchivedDatasource <-- Observable: 
