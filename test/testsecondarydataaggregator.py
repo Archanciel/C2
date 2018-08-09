@@ -104,5 +104,61 @@ class TestSecondaryDataAggregator(unittest.TestCase):
 
         os.remove(csvSecondaryDataFileName)
 
+    def testSecDataGenerationInSimulationModeC(self):
+        csvPrimaryDataFileName = "primary-c.csv"
+        csvSecondaryDataFileName = "secondary.csv"
+        csvExpectedSecondaryDataFileName = "expected-secondary-c.csv"
+        controller = Controller()
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
+        controller.stop()
+
+        self.assertTrue(os.path.isfile(csvSecondaryDataFileName))
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
+                for secondaryFileLine in csvSecondaryFile:
+                    expectedSecondaryFileLine = csvExpectedSecondaryFile.readline()
+                    self.assertEqual(secondaryFileLine, expectedSecondaryFileLine)
+
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
+                secondaryRecordsNumber, expectedSecondaryRecordsNumber = 0, 0
+                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
+                    pass
+                for expectedSecondaryRecordsNumber, _ in enumerate(csvExpectedSecondaryFile):
+                    pass
+                self.assertEqual(secondaryRecordsNumber, expectedSecondaryRecordsNumber)
+
+        os.remove(csvSecondaryDataFileName)
+
+    def testSecDataGenerationInSimulationModeD(self):
+        csvPrimaryDataFileName = "primary-d.csv"
+        csvSecondaryDataFileName = "secondary.csv"
+        csvExpectedSecondaryDataFileName = "expected-secondary-d.csv"
+        controller = Controller()
+
+        #IMPORTANT: when forcing execution parms, no space separate parm name and parm value !
+        controller.start(['-ms', '-p{}'.format(csvPrimaryDataFileName)])
+        controller.stop()
+
+        self.assertTrue(os.path.isfile(csvSecondaryDataFileName))
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
+                for secondaryFileLine in csvSecondaryFile:
+                    expectedSecondaryFileLine = csvExpectedSecondaryFile.readline()
+                    self.assertEqual(secondaryFileLine, expectedSecondaryFileLine)
+
+        with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
+            with open(csvExpectedSecondaryDataFileName, 'r') as csvExpectedSecondaryFile:
+                secondaryRecordsNumber, expectedSecondaryRecordsNumber = 0, 0
+                for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
+                    pass
+                for expectedSecondaryRecordsNumber, _ in enumerate(csvExpectedSecondaryFile):
+                    pass
+                self.assertEqual(secondaryRecordsNumber, expectedSecondaryRecordsNumber)
+
+        os.remove(csvSecondaryDataFileName)
+
 if __name__ == '__main__':
     unittest.main()

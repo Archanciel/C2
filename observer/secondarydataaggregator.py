@@ -63,8 +63,8 @@ class SecondaryDataAggregator(Observer):
             lastNotifiedPriceFloat = priceFloat
             lastNotifiedVolumeFloat = volumeFloat
             secondary_data = self.aggregateSecondaryData(timestampMilliSec, priceFloat, volumeFloat)
-            # if not secondary_data:
-            #     return
+            if not secondary_data:
+                return
             sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat = secondary_data
 
             # calling the criterion to check if it should raise an alarm
@@ -75,21 +75,29 @@ class SecondaryDataAggregator(Observer):
             # sd file to enable viewing them in a price/volume chart. Note that the archiver
             # takes care of implementing the secondary data record index.
 #            self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat) + criterionData)
-            self.storeAndPrintSecondaryData(sdPricefloat, sdTimestamp, sdTradesNumber, sdVolumeFloat)
+            if sdPricefloat > 0:
+                self.storeAndPrintSecondaryData(sdPricefloat, sdTimestamp, sdTradesNumber, sdVolumeFloat)
 
             while int(timestampMilliSec / 1000) * 1000 > self.lastSecEndTimestamp:
                 sdTimestamp = self.lastSecEndTimestamp
                 sdTradesNumber = 0
                 sdVolumeFloat = 0
-                sdPricefloat = self.lastSecPriceVolumeTotal / self.lastSecVolume
-                self.storeAndPrintSecondaryData(sdPricefloat, sdTimestamp, sdTradesNumber, sdVolumeFloat)
+
+                if self.lastSecVolume > 0:
+                    sdPricefloat = self.lastSecPriceVolumeTotal / self.lastSecVolume
+                    self.storeAndPrintSecondaryData(sdPricefloat, sdTimestamp, sdTradesNumber, sdVolumeFloat)
+                else:
+                    # happens if no transaction were yet processed
+                    sdPricefloat = 0
+
                 self.lastSecBeginTimestamp += 1000
                 self.lastSecEndTimestamp += 1000
 
-            # self.lastSecVolume = lastNotifiedVolumeFloat
-            # self.lastSecPriceVolumeTotal = lastNotifiedVolumeFloat * lastNotifiedPriceFloat
-            # self.lastSecBeginTimestamp += 1000
-            # self.lastSecEndTimestamp += 1000
+            self.lastSecVolume = lastNotifiedVolumeFloat
+            self.lastSecPriceVolumeTotal = lastNotifiedVolumeFloat * lastNotifiedPriceFloat
+            self.lastSecTradeNumber += 1
+            self.lastSecBeginTimestamp += 1000
+            self.lastSecEndTimestamp += 1000
             self.isOneSecondIntervalReached = False
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
@@ -129,6 +137,7 @@ class SecondaryDataAggregator(Observer):
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
         if timestampMilliSec >= self.lastSecBeginTimestamp and timestampMilliSec < self.lastSecEndTimestamp:
+            # here, the current primary data ts is within the current second frame
             self.lastSecTradeNumber += 1
             self.lastSecVolume += volumeFloat
             self.lastSecPriceVolumeTotal += priceFloat * volumeFloat
@@ -136,10 +145,16 @@ class SecondaryDataAggregator(Observer):
             return None, None, None, None
         elif timestampMilliSec >= self.lastSecEndTimestamp:
             if timestampMilliSec < self.lastSecEndTimestamp + 1000:
+                # here, the current primary data ts is within the next second frame
                 lastSecBeginTimestamp = self.lastSecBeginTimestamp
                 lastSecTradeNumber = self.lastSecTradeNumber
                 lastSecVolume = self.lastSecVolume
-                lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
+
+                if self.lastSecVolume > 0:
+                    lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
+                else:
+                    # happens if no transaction were yet processed, at start of RT or simulation
+                    lastSecAvgPrice = 0
 
                 self.lastSecTradeNumber = 1
                 self.lastSecVolume = volumeFloat
@@ -150,26 +165,27 @@ class SecondaryDataAggregator(Observer):
 
                 return lastSecBeginTimestamp, lastSecTradeNumber, lastSecVolume, lastSecAvgPrice
             else:
+                # here, the current primary data ts is after the next second frame
                 lastSecBeginTimestamp = self.lastSecBeginTimestamp
                 lastSecTradeNumber = self.lastSecTradeNumber
                 lastSecVolume = self.lastSecVolume
-                lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
+
+                if self.lastSecVolume > 0:
+                    lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
+                else:
+                    # happens if no transaction were yet processed, at start of RT or simulation
+                    lastSecAvgPrice = 0
+
                 self.isOneSecondIntervalReached = True
 
                 return lastSecBeginTimestamp, lastSecTradeNumber, lastSecVolume, lastSecAvgPrice
-#        else:
-            # lastSecBeginTimestamp = self.lastSecBeginTimestamp
-            # lastSecTradeNumber = 0
-            # lastSecVolume = 0
-            # lastSecAvgPrice = self.lastSecPriceVolumeTotal / self.lastSecVolume
-            #
-            # self.lastSecTradeNumber = 1
-            # self.lastSecVolume = volumeFloat
-            # self.lastSecPriceVolumeTotal = priceFloat * volumeFloat
-            # self.isOneSecondIntervalReached = True
-            #
-            # return lastSecBeginTimestamp, lastSecTradeNumber, lastSecVolume, lastSecAvgPrice
-#            return None
+        else:
+            # here, the current primary data ts is before the current second frame. This
+            # situation occurs at the very start of receiving the RT data or when processing
+            # the first lines of the primary data input file in simulation mode when the ts
+            # of those lines is before the ts calculated by the calculateStartTimestamp() method.
+            # In this case, the line must simply be ignored.
+            return None
 
     def close(self):
         '''
