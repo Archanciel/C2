@@ -161,10 +161,10 @@ class TestController(unittest.TestCase):
             # running on Android
             return
 
-        csvPrimaryDataFileName = "primary-two.csv"
+        csvPrimaryDataFileName = "primary-seqdiag.csv"
         csvSecondaryDataFileName = "secondary.csv"
         controller = Controller()
-        classCtorArgsDic = {'ArchivedDatasource': ['primary-two.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
+        classCtorArgsDic = {'ArchivedDatasource': ['primary-seqdiag.csv'], 'SecondaryDataAggregator': ['secondary.csv', False], 'Archiver': ['secondary.csv', 'csv dummy col titles', False]}
 
         SeqDiagBuilder.activate(parentdir, 'Controller', 'start', classCtorArgsDic)  # activate sequence diagram building
 
