@@ -75,10 +75,13 @@ class SecondaryDataAggregator(Observer):
             # sd file to enable viewing them in a price/volume chart. Note that the archiver
             # takes care of implementing the secondary data record index.
 #            self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat) + criterionData)
-            if sdPricefloat > 0:
+            if sdPricefloat and sdPricefloat > 0:
                 self.storeAndPrintSecondaryData(sdPricefloat, sdTimestamp, sdTradesNumber, sdVolumeFloat)
 
+            wasTimeCaughtUp = False
+
             while int(timestampMilliSec / 1000) * 1000 > self.lastSecEndTimestamp:
+                wasTimeCaughtUp = True
                 sdTimestamp = self.lastSecEndTimestamp
                 sdTradesNumber = 0
                 sdVolumeFloat = 0
@@ -93,12 +96,13 @@ class SecondaryDataAggregator(Observer):
                 self.lastSecBeginTimestamp += 1000
                 self.lastSecEndTimestamp += 1000
 
-            self.lastSecVolume = lastNotifiedVolumeFloat
-            self.lastSecPriceVolumeTotal = lastNotifiedVolumeFloat * lastNotifiedPriceFloat
-            self.lastSecTradeNumber += 1
-            self.lastSecBeginTimestamp += 1000
-            self.lastSecEndTimestamp += 1000
-            self.isOneSecondIntervalReached = False
+            if wasTimeCaughtUp:
+                self.lastSecVolume = lastNotifiedVolumeFloat
+                self.lastSecPriceVolumeTotal = lastNotifiedVolumeFloat * lastNotifiedPriceFloat
+                self.lastSecTradeNumber += 1
+                self.lastSecBeginTimestamp += 1000
+                self.lastSecEndTimestamp += 1000
+                self.isOneSecondIntervalReached = False
 
         SeqDiagBuilder.recordFlow() # called to build the sequence diagram. Can be commented out later ...
 
@@ -142,7 +146,7 @@ class SecondaryDataAggregator(Observer):
             self.lastSecVolume += volumeFloat
             self.lastSecPriceVolumeTotal += priceFloat * volumeFloat
 
-            return None, None, None, None
+            return None, None, None, None # since we are still within the current second time frame !
         elif timestampMilliSec >= self.lastSecEndTimestamp:
             if timestampMilliSec < self.lastSecEndTimestamp + 1000:
                 # here, the current primary data ts is within the next second frame
