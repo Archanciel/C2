@@ -152,7 +152,7 @@ class TestController(unittest.TestCase):
                 for secondaryRecordsNumber, _ in enumerate(csvSecondaryFile):
                     pass
                 self.assertEqual(primaryRecordsNumber, 25)
-                self.assertEqual(secondaryRecordsNumber, 12)
+                self.assertEqual(secondaryRecordsNumber, 10)
 
         os.remove(csvSecondaryDataFileName)
 
