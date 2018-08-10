@@ -65,7 +65,7 @@ class SecondaryDataAggregator(Observer):
             secondary_data = self.aggregateSecondaryData(timestampMilliSec, priceFloat, volumeFloat)
             if not secondary_data:
                 return
-            sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat = secondary_data
+            catchUpSdTimestamp, catchUpSdTradesNumber, catchUpSdVolumeFloat, sdPricefloat = secondary_data
 
             # calling the criterion to check if it should raise an alarm
             criterionData = self.criterion.check(data)
@@ -76,22 +76,23 @@ class SecondaryDataAggregator(Observer):
             # takes care of implementing the secondary data record index.
 #            self.archiver.update((sdTimestamp, sdTradesNumber, sdVolumeFloat, sdPricefloat) + criterionData)
             if sdPricefloat and sdPricefloat > 0:
-                self.storeAndPrintSecondaryData(sdPricefloat, sdTimestamp, sdTradesNumber, sdVolumeFloat)
+                self.storeAndPrintSecondaryData(sdPricefloat, catchUpSdTimestamp, catchUpSdTradesNumber, catchUpSdVolumeFloat)
 
             wasTimeCaughtUp = False
+            catchUpSdTradesNumber = 0
+            catchUpSdVolumeFloat = 0
+            catchUpSdPricefloat = 0
 
             while int(timestampMilliSec / 1000) * 1000 > self.lastSecEndTimestamp:
                 wasTimeCaughtUp = True
-                sdTimestamp = self.lastSecEndTimestamp
-                sdTradesNumber = 0
-                sdVolumeFloat = 0
-
+                catchUpSdTimestamp = self.lastSecEndTimestamp
                 if self.lastSecVolume > 0:
-                    sdPricefloat = self.lastSecPriceVolumeTotal / self.lastSecVolume
-                    self.storeAndPrintSecondaryData(sdPricefloat, sdTimestamp, sdTradesNumber, sdVolumeFloat)
+                    # calculating the price to display for the 0 volume catchup secondary data
+                    catchUpSdPricefloat = self.lastSecPriceVolumeTotal / self.lastSecVolume
+                    self.storeAndPrintSecondaryData(catchUpSdPricefloat, catchUpSdTimestamp, catchUpSdTradesNumber, catchUpSdVolumeFloat)
                 else:
                     # happens if no transaction were yet processed
-                    sdPricefloat = 0
+                    catchUpSdPricefloat = 0
 
                 self.lastSecBeginTimestamp += 1000
                 self.lastSecEndTimestamp += 1000
@@ -99,7 +100,7 @@ class SecondaryDataAggregator(Observer):
             if wasTimeCaughtUp:
                 self.lastSecVolume = lastNotifiedVolumeFloat
                 self.lastSecPriceVolumeTotal = lastNotifiedVolumeFloat * lastNotifiedPriceFloat
-                self.lastSecTradeNumber += 1
+                self.lastSecTradeNumber = 1
                 self.lastSecBeginTimestamp += 1000
                 self.lastSecEndTimestamp += 1000
                 self.isOneSecondIntervalReached = False
