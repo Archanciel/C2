@@ -31,10 +31,10 @@ class TestController(unittest.TestCase):
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
             header = csvPrimaryFile.readline()
-            self.assertEqual(header, 'IDX	TIMESTAMP (MS)	VOLUME     	PRICE\n')
+            self.assertEqual(header, 'IDX	TIMESTAMP (MS)	VOLUME\tPRICE\n')
         with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
             header = csvSecondaryFile.readline()
-            self.assertEqual(header, 'IDX	TRD\tTIMESTAMP (MS)	VOLUME     	PRICE\n')
+            self.assertEqual(header, 'IDX	TRD\tTIMESTAMP (MS)	VOLUME\tPRICE\n')
 
         self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
 
@@ -58,10 +58,10 @@ class TestController(unittest.TestCase):
 
         with open(csvPrimaryDataFileName, 'r') as csvPrimaryFile:
             header = csvPrimaryFile.readline()
-            self.assertEqual(header, 'IDX	TIMESTAMP (MS)	VOLUME     	PRICE\n')
+            self.assertEqual(header, 'IDX	TIMESTAMP (MS)	VOLUME\tPRICE\n')
         with open(csvSecondaryDataFileName, 'r') as csvSecondaryFile:
             header = csvSecondaryFile.readline()
-            self.assertEqual(header, 'IDX	TRD\tTIMESTAMP (MS)	VOLUME     	PRICE\n')
+            self.assertEqual(header, 'IDX	TRD\tTIMESTAMP (MS)	VOLUME\tPRICE\n')
 
         self.assertTrue(os.path.isfile(csvPrimaryDataFileName))
 

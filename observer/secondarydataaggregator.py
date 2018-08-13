@@ -36,7 +36,7 @@ class SecondaryDataAggregator(Observer):
         self.lastSecPriceVolumeTotal = 0
         self.lastSecTradeNumber = 0
 
-        print('Time\t\tTrades\tVolume\t\tPrice')
+        print('Time\t\tTrades\t\tVolume\t\tPrice')
 
     def update(self, data):
         recordIndex = ''

@@ -20,7 +20,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME\tPRICE'], next(csvReader))
 
         os.remove(csvFileName)
 
@@ -43,7 +43,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME\tPRICE'], next(csvReader))
 
         os.remove(csvFileName)
 
@@ -57,7 +57,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME\tPRICE'], next(csvReader))
             self.assertEqual(['1\t1530201849627\t0.100402\t6103.00'], next(csvReader))
             self.assertEqual(['2\t1530201851230\t0.030000\t6103.99'], next(csvReader))
 
@@ -85,7 +85,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME\tPRICE'], next(csvReader))
             self.assertEqual(['1\t1530201849627\t0.100402\t6103.00'], next(csvReader))
             self.assertEqual(['2\t1530201851230\t0.030000\t6103.99'], next(csvReader))
 
@@ -103,7 +103,7 @@ class TestArchiver(unittest.TestCase):
 
         with open(csvFileName, 'r') as csvFile:
             csvReader = csv.reader(csvFile)
-            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME     \tPRICE'], next(csvReader))
+            self.assertEqual(['IDX\tTIMESTAMP (MS)\tVOLUME\tPRICE'], next(csvReader))
             self.assertEqual(['1\t1530201849627\t0.100402\t6103.00'], next(csvReader))
             self.assertEqual(['2\t1530201851230\t0.030000\t6103.99'], next(csvReader))
 

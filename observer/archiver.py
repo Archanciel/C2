@@ -9,8 +9,8 @@ class Archiver(Observer):
     :seqdiag_note In simulation mode, this Observer (Archiver, like SecondaryData Aggregator, inherits from Observer) writes the secondary data on disk. In real time mode, saves on disk the primary data.
     '''
 
-    PRIMARY_DATA_CSV_ROW_HEADER = ["IDX", "TIMESTAMP (MS)", "VOLUME     ", "PRICE"]
-    SECONDARY_DATA_CSV_ROW_HEADER = ["IDX", "TRD", "TIMESTAMP (MS)", "VOLUME     ", "PRICE"]
+    PRIMARY_DATA_CSV_ROW_HEADER = ["IDX", "TIMESTAMP (MS)", "VOLUME", "PRICE"]
+    SECONDARY_DATA_CSV_ROW_HEADER = ["IDX", "TRD", "TIMESTAMP (MS)", "VOLUME", "PRICE"]
 
     def __init__(self, filename, csvFileHeader, isVerbose):
         '''
