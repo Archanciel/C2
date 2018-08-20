@@ -109,7 +109,7 @@ class Controller:
             self.primaryDataFileName = self.buildPrimaryFileName(primaryFileName, dateTimeStr)
             self.datasource.addObserver(Archiver(self.primaryDataFileName, Archiver.PRIMARY_DATA_CSV_ROW_HEADER, isVerbose))
 
-            #adding a Notifyer to compute the secondary data, store them on disk and send
+            #adding an Observer to compute the secondary data, store them on disk and send
             #them to the Criterion
             csvSecondaryDataFileName = "{}-{}.csv".format(secondaryFileName, dateTimeStr)
             #forcing isVerbose to False to avoid interfering with Archiver verbosity !
